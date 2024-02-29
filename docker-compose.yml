@@ -1,0 +1,10 @@
+services:
+  menu_manager_db:
+    image: postgres
+    volumes:
+      - ./01-create-database.sql:/docker-entrypoint-initdb.d/01-create-database.sql
+    environment:
+      POSTGRES_USER:
+      POSTGRES_PASSWORD:
+    ports:
+      - 5432:5432
