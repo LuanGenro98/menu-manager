@@ -1,14 +1,12 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/menu_manager
+    url: jdbc:postgresql://localhost:5432/menu_manager?createDatabaseIfNotExist=true
     username:
     password:
-  jpa:
-    properties:
-      javax:
-        persistence:
-          schema-generation:
-            scripts:
-              action: create
-              create-target: create_tables.sql
-              create-source: metadata
+  liquibase:
+    enabled: true
+    change-log: /db/db.changelog-master.xml
+
+menumanager:
+  endpoints:
+    categories: http://localhost:8080/categories/

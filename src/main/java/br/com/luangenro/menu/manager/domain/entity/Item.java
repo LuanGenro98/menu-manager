@@ -6,23 +6,28 @@ import lombok.Data;
 import java.util.UUID;
 
 @Entity
-@Table(name = "item")
+@Table(name = "item", schema = "public")
 @Data
 public class Item {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
-    @Column(name = "uuid")
+    @Column(name = "uuid", nullable = false)
     private UUID uuid;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    @Column(name = "description")
+    @Column(name = "description", nullable = false, length = 100)
     private String description;
 
-    @Column(name = "price")
+    @Column(name = "price", nullable = false)
     private Double price;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 }
