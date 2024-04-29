@@ -1,9 +1,9 @@
 package br.com.luangenro.menu.manager.controller;
 
 import br.com.luangenro.menu.manager.domain.dto.CategoryResponse;
-import br.com.luangenro.menu.manager.service.CategoryService;
 import br.com.luangenro.menu.manager.domain.dto.CreateCategoryRequest;
 import br.com.luangenro.menu.manager.domain.dto.CreateCategoryResponse;
+import br.com.luangenro.menu.manager.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,7 +39,7 @@ public class CategoryController {
     ResponseEntity<CreateCategoryResponse> createCategory(@RequestBody @Valid CreateCategoryRequest request){
         var response = service.createCategory(request);
         return ResponseEntity.created(
-                URI.create(CATEGORIES_ENDPOINT + response.uuid()))
+                        URI.create(CATEGORIES_ENDPOINT + response.id()))
                 .body(response);
     }
 }

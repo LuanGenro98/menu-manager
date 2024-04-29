@@ -28,14 +28,14 @@ public class CategoryService {
         }
         return CategoryResponse
                 .builder()
-                .uuid(category.getUuid())
+                .id(category.getId())
                 .name(category.getName())
                 .description(category.getDescription())
                 .items(category.getItems()
                         .stream()
                         .map(item -> ItemResponse
                                 .builder()
-                                .uuid(item.getUuid())
+                                .id(item.getId())
                                 .name(item.getName())
                                 .description(item.getDescription())
                                 .price(item.getPrice())
@@ -53,14 +53,14 @@ public class CategoryService {
                 .stream()
                 .map(category -> CategoryResponse
                         .builder()
-                        .uuid(category.getUuid())
+                        .id(category.getId())
                         .name(category.getName())
                         .description(category.getDescription())
                         .items(category.getItems()
                                 .stream()
                                 .map(item -> ItemResponse
                                         .builder()
-                                        .uuid(item.getUuid())
+                                        .id(item.getId())
                                         .name(item.getName())
                                         .description(item.getDescription())
                                         .price(item.getPrice())
@@ -80,7 +80,7 @@ public class CategoryService {
         repository.save(category);
         return CreateCategoryResponse
                 .builder()
-                .uuid(category.getUuid())
+                .id(category.getId())
                 .name(category.getName())
                 .build();
     }

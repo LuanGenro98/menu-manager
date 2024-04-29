@@ -33,4 +33,8 @@ public class Category {
 
     @OneToMany(mappedBy = "category")
     private List<Item> items;
+
+    public Category(Integer id) {
+        this.id = id;
+    }
 }
