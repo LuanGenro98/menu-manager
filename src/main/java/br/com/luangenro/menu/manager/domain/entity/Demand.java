@@ -5,16 +5,17 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "Demand", schema = "public")
+@Table(name = "demand", schema = "public")
 @Data
 public class Demand {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private int id;
 
     @Column(name = "uuid")
     private UUID uuid;
@@ -30,5 +31,9 @@ public class Demand {
     private DemandStatus status;
 
     @Column(name = "table_number")
-    private Integer tableNumber;
+    private int tableNumber;
+
+    @OneToMany(mappedBy = "demand")
+    private List<DemandItem> demandItems;
+
 }

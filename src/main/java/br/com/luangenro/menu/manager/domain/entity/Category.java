@@ -20,7 +20,7 @@ public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Integer id;
+    private int id;
 
     @Column(name = "uuid", nullable = false)
     private UUID uuid;
@@ -34,7 +34,7 @@ public class Category {
     @OneToMany(mappedBy = "category")
     private List<Item> items;
 
-    public Category(Integer id) {
+    public Category(int id) {
         this.id = id;
     }
 }

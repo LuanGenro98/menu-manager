@@ -21,7 +21,7 @@ public class CategoryService {
 
     private final CategoryRepository repository;
 
-    public CategoryResponse getCategory(Integer id){
+    public CategoryResponse getCategory(int id){
         var category = repository.findById(id).orElse(null);
         if(isEmpty(category)){
             throw new CategoryNotFoundException("category not found");

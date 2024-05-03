@@ -24,7 +24,7 @@ public class CategoryController {
     private String CATEGORIES_ENDPOINT;
 
     @GetMapping("{id}")
-    ResponseEntity<CategoryResponse> getCategory(@PathVariable Integer id){
+    ResponseEntity<CategoryResponse> getCategory(@PathVariable int id){
         var response = service.getCategory(id);
         return ResponseEntity.ok(response);
     }
