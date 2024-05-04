@@ -2,6 +2,7 @@ package br.com.luangenro.menu.manager.domain.entity;
 
 import br.com.luangenro.menu.manager.domain.enumeration.DemandStatus;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.Instant;
@@ -11,10 +12,11 @@ import java.util.UUID;
 @Entity
 @Table(name = "demand", schema = "public")
 @Data
+@Builder
 public class Demand {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column(name = "uuid")
@@ -29,6 +31,9 @@ public class Demand {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private DemandStatus status;
+
+    @Column(name = "price")
+    private double price;
 
     @Column(name = "table_number")
     private int tableNumber;

@@ -11,3 +11,4 @@ menumanager:
   endpoints:
     categories: http://localhost:8080/categories/
     items: http://localhost:8080/items/
+    demands: http://localhost:8080/demands/

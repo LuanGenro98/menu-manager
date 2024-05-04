@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 public class DemandItem {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @ManyToOne
