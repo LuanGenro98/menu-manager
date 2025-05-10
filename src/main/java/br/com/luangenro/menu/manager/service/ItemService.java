@@ -14,18 +14,18 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ItemService {
 
-    private final ItemRepository repository;
+  private final ItemRepository repository;
 
-    public CreateItemResponse createItem(CreateItemRequest request) {
-        var item = Item
-                .builder()
-                .uuid(UUID.randomUUID())
-                .name(request.name())
-                .description(request.description())
-                .price(request.price())
-                .category(new Category(request.categoryId()))
-                .build();
-        repository.save(item);
-        return new CreateItemResponse(item.getId(), item.getName());
-    }
+  public CreateItemResponse createItem(CreateItemRequest request) {
+    var item = Item
+        .builder()
+        .uuid(UUID.randomUUID())
+        .name(request.name())
+        .description(request.description())
+        .price(request.price())
+        .category(new Category(request.categoryId()))
+        .build();
+    repository.save(item);
+    return new CreateItemResponse(item.getId(), item.getName());
+  }
 }
