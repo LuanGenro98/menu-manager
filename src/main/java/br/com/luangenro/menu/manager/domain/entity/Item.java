@@ -1,6 +1,7 @@
 package br.com.luangenro.menu.manager.domain.entity;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -31,7 +32,7 @@ public class Item {
   private String description;
 
   @Column(name = "price", nullable = false)
-  private Double price;
+  private BigDecimal price;
 
   @ManyToOne
   @JoinColumn(name = "category_id")

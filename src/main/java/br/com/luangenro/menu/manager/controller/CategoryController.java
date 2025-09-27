@@ -3,6 +3,7 @@ package br.com.luangenro.menu.manager.controller;
 import br.com.luangenro.menu.manager.domain.dto.CategoryResponse;
 import br.com.luangenro.menu.manager.domain.dto.CreateCategoryRequest;
 import br.com.luangenro.menu.manager.domain.dto.CreateCategoryResponse;
+import br.com.luangenro.menu.manager.domain.dto.UpdateCategoryRequest;
 import br.com.luangenro.menu.manager.service.CategoryService;
 import java.net.URI;
 import java.util.List;
@@ -54,5 +55,17 @@ public class CategoryController implements CategoryApi {
             .toUri();
 
     return ResponseEntity.created(location).body(response);
+  }
+
+  @Override
+  public ResponseEntity<CategoryResponse> updateCategory(int id, UpdateCategoryRequest request) {
+    CategoryResponse updatedCategory = service.updateCategory(id, request);
+    return ResponseEntity.ok(updatedCategory);
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteCategory(int id) {
+    service.deleteCategory(id);
+    return ResponseEntity.noContent().build();
   }
 }

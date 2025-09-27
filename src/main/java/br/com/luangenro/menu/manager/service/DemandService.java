@@ -9,6 +9,7 @@ import br.com.luangenro.menu.manager.domain.enumeration.DemandStatus;
 import br.com.luangenro.menu.manager.repository.DemandItemRepository;
 import br.com.luangenro.menu.manager.repository.DemandRepository;
 import br.com.luangenro.menu.manager.repository.ItemRepository;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -35,7 +36,9 @@ public class DemandService {
             .createdAt(Instant.now())
             .status(DemandStatus.ORDERED)
             .tableNumber(demandRequest.tableNumber())
-            .price(demandedItems.stream().mapToDouble(item -> item.getPrice()).sum())
+            //            .price(demandedItems.stream().mapToDouble(item -> item.getPrice()).sum())
+            .price(new BigDecimal(0))
+            //TODO: Ajustar
             .build();
 
     demandRepository.save(demand);

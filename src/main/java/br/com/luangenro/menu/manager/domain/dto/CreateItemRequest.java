@@ -2,6 +2,7 @@ package br.com.luangenro.menu.manager.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
+import java.math.BigDecimal;
 
 /**
  * Represents the data required to create a new menu item.
@@ -33,7 +34,7 @@ public record CreateItemRequest(
             requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull
         @PositiveOrZero
-        Double price,
+        BigDecimal price,
     @Schema(
             description = "The ID of the category this item belongs to.",
             example = "3",

@@ -2,6 +2,7 @@ package br.com.luangenro.menu.manager.domain.entity;
 
 import br.com.luangenro.menu.manager.domain.enumeration.DemandStatus;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -32,7 +33,7 @@ public class Demand {
   private DemandStatus status;
 
   @Column(name = "price")
-  private double price;
+  private BigDecimal price;
 
   @Column(name = "table_number")
   private int tableNumber;

@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -32,7 +33,7 @@ public class RestExceptionHandler {
    * @param request The current web request.
    * @return A ResponseEntity with a 404 Not Found status and a standardized error body.
    */
-  @ExceptionHandler(CategoryNotFoundException.class)
+  @ExceptionHandler({CategoryNotFoundException.class, ItemNotFoundException.class})
   public ResponseEntity<ApiErrorResponse> handleResourceNotFoundException(
       RuntimeException ex, HttpServletRequest request) {
 
@@ -111,6 +112,25 @@ public class RestExceptionHandler {
     ApiErrorResponse errorResponse =
         buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, message, request, null);
     return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  /**
+   * Handles exceptions when the request body is malformed or unreadable. This is typically thrown
+   * when the client sends an invalid JSON payload.
+   *
+   * @param ex The HttpMessageNotReadableException that was thrown.
+   * @param request The current web request.
+   * @return A ResponseEntity with a 400 Bad Request status.
+   */
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<ApiErrorResponse> handleHttpMessageNotReadable(
+      HttpMessageNotReadableException ex, HttpServletRequest request) {
+
+    log.warn("Failed to parse request body: {}", ex.getMessage());
+    String message = "Failed to parse request body. Please ensure it is a valid JSON format.";
+    ApiErrorResponse errorResponse =
+        buildErrorResponse(HttpStatus.BAD_REQUEST, message, request, null);
+    return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
   }
 
   /**

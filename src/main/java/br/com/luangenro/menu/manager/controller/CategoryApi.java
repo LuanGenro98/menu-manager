@@ -3,6 +3,7 @@ package br.com.luangenro.menu.manager.controller;
 import br.com.luangenro.menu.manager.domain.dto.CategoryResponse;
 import br.com.luangenro.menu.manager.domain.dto.CreateCategoryRequest;
 import br.com.luangenro.menu.manager.domain.dto.CreateCategoryResponse;
+import br.com.luangenro.menu.manager.domain.dto.UpdateCategoryRequest;
 import br.com.luangenro.menu.manager.exception.ApiErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -97,4 +98,63 @@ public interface CategoryApi {
   @PostMapping
   ResponseEntity<CreateCategoryResponse> createCategory(
       @RequestBody @Valid CreateCategoryRequest request);
+
+  /**
+   * Updates an existing category.
+   *
+   * @param id The unique identifier of the category to be updated.
+   * @param request The request body containing the new details for the category.
+   * @return A {@link ResponseEntity} with the updated {@link CategoryResponse}.
+   */
+  @Operation(summary = "Update an existing category")
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = "200",
+        description = "Category updated successfully",
+        content =
+            @Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = CategoryResponse.class))),
+    @ApiResponse(
+        responseCode = "400",
+        description = "Invalid request body due to validation constraints",
+        content =
+            @Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ApiErrorResponse.class))),
+    @ApiResponse(
+        responseCode = "404",
+        description = "Category not found",
+        content =
+            @Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ApiErrorResponse.class)))
+  })
+  @PutMapping("/{id}")
+  ResponseEntity<CategoryResponse> updateCategory(
+      @Parameter(description = "ID of the category to be updated", required = true) @PathVariable
+          int id,
+      @RequestBody @Valid UpdateCategoryRequest request);
+
+  /**
+   * Deletes a category by its ID.
+   *
+   * @param id The unique identifier of the category to be deleted.
+   * @return A {@link ResponseEntity} with no content (HTTP 204).
+   */
+  @Operation(summary = "Delete a category")
+  @ApiResponses({
+    @ApiResponse(responseCode = "204", description = "Category deleted successfully"),
+    @ApiResponse(
+        responseCode = "404",
+        description = "Category not found",
+        content =
+            @Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ApiErrorResponse.class)))
+  })
+  @DeleteMapping("/{id}")
+  ResponseEntity<Void> deleteCategory(
+      @Parameter(description = "ID of the category to be deleted", required = true) @PathVariable
+          int id);
 }
