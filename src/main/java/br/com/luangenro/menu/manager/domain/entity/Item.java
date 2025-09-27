@@ -1,13 +1,12 @@
 package br.com.luangenro.menu.manager.domain.entity;
 
 import jakarta.persistence.*;
+import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name = "item", schema = "public")
@@ -17,28 +16,27 @@ import java.util.UUID;
 @Builder
 public class Item {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private int id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id")
+  private int id;
 
-    @Column(name = "uuid", nullable = false)
-    private UUID uuid;
+  @Column(name = "uuid", nullable = false)
+  private UUID uuid;
 
-    @Column(name = "name", nullable = false, length = 50)
-    private String name;
+  @Column(name = "name", nullable = false, length = 50)
+  private String name;
 
-    @Column(name = "description", nullable = false, length = 100)
-    private String description;
+  @Column(name = "description", nullable = false, length = 100)
+  private String description;
 
-    @Column(name = "price", nullable = false)
-    private Double price;
+  @Column(name = "price", nullable = false)
+  private Double price;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private Category category;
+  @ManyToOne
+  @JoinColumn(name = "category_id")
+  private Category category;
 
-    @OneToMany(mappedBy = "item")
-    private List<DemandItem> demandItems;
-
+  @OneToMany(mappedBy = "item")
+  private List<DemandItem> demandItems;
 }

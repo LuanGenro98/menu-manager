@@ -1,12 +1,7 @@
 package br.com.luangenro.menu.manager.domain.dto;
 
+import java.util.List;
 import lombok.Builder;
 
-import java.util.List;
-
 @Builder
-public record CategoryResponse(int id,
-                               String name,
-                               String description,
-                               List<ItemResponse> items) {
-}
+public record CategoryResponse(int id, String name, String description, List<ItemResponse> items) {}

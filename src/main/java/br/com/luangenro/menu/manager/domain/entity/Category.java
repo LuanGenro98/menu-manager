@@ -1,13 +1,12 @@
 package br.com.luangenro.menu.manager.domain.entity;
 
 import jakarta.persistence.*;
+import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name = "category", schema = "public")
@@ -17,24 +16,24 @@ import java.util.UUID;
 @Builder
 public class Category {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private int id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id")
+  private int id;
 
-    @Column(name = "uuid", nullable = false)
-    private UUID uuid;
+  @Column(name = "uuid", nullable = false)
+  private UUID uuid;
 
-    @Column(name = "name", nullable = false, length = 50)
-    private String name;
+  @Column(name = "name", nullable = false, length = 50)
+  private String name;
 
-    @Column(name = "description", nullable = false, length = 100)
-    private String description;
+  @Column(name = "description", nullable = false, length = 100)
+  private String description;
 
-    @OneToMany(mappedBy = "category")
-    private List<Item> items;
+  @OneToMany(mappedBy = "category")
+  private List<Item> items;
 
-    public Category(int id) {
-        this.id = id;
-    }
+  public Category(int id) {
+    this.id = id;
+  }
 }
