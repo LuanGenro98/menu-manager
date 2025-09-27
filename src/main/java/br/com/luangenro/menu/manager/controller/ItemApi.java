@@ -3,6 +3,7 @@ package br.com.luangenro.menu.manager.controller;
 import br.com.luangenro.menu.manager.domain.dto.CreateItemRequest;
 import br.com.luangenro.menu.manager.domain.dto.CreateItemResponse;
 import br.com.luangenro.menu.manager.domain.dto.ItemResponse;
+import br.com.luangenro.menu.manager.exception.ApiErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

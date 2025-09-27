@@ -1,4 +1,4 @@
-package br.com.luangenro.menu.manager.controller;
+package br.com.luangenro.menu.manager.exception;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;

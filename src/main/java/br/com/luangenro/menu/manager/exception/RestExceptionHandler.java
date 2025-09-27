@@ -1,6 +1,5 @@
-package br.com.luangenro.menu.manager.controller;
+package br.com.luangenro.menu.manager.exception;
 
-import br.com.luangenro.menu.manager.exception.CategoryNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;

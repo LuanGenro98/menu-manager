@@ -2,6 +2,7 @@ package br.com.luangenro.menu.manager.controller;
 
 import br.com.luangenro.menu.manager.domain.dto.CreateDemandRequest;
 import br.com.luangenro.menu.manager.domain.dto.CreateDemandResponse;
+import br.com.luangenro.menu.manager.exception.ApiErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
