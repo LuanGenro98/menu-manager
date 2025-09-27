@@ -43,7 +43,13 @@ public interface CategoryApi {
               mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = CategoryResponse.class))
         }),
-    @ApiResponse(responseCode = "404", description = "Category not found", content = @Content)
+    @ApiResponse(
+        responseCode = "404",
+        description = "Category not found",
+        content =
+            @Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ApiErrorResponse.class)))
   })
   @GetMapping("/{id}")
   ResponseEntity<CategoryResponse> getCategory(
@@ -79,7 +85,13 @@ public interface CategoryApi {
               mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = CreateCategoryResponse.class))
         }),
-    @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
+    @ApiResponse(
+        responseCode = "400",
+        description = "Invalid request body due to validation constraints",
+        content =
+            @Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ApiErrorResponse.class)))
   })
   @PostMapping
   ResponseEntity<CreateCategoryResponse> createCategory(

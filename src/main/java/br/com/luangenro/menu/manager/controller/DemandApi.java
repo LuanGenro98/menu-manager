@@ -43,8 +43,11 @@ public interface DemandApi {
         }),
     @ApiResponse(
         responseCode = "400",
-        description = "Invalid request data, such as empty item list or non-existent items",
-        content = @Content)
+        description = "Invalid request data, such as an empty item list or non-existent item IDs",
+        content =
+            @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiErrorResponse.class)))
   })
   @PostMapping
   ResponseEntity<CreateDemandResponse> createDemand(

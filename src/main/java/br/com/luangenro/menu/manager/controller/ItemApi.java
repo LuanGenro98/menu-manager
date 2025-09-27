@@ -6,6 +6,7 @@ import br.com.luangenro.menu.manager.domain.dto.ItemResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,7 +34,13 @@ public interface ItemApi {
   @Operation(summary = "Find an item by its ID")
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "Item found"),
-    @ApiResponse(responseCode = "404", description = "Item not found", content = @Content)
+    @ApiResponse(
+        responseCode = "404",
+        description = "Item not found",
+        content =
+            @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiErrorResponse.class)))
   })
   @GetMapping("/{id}")
   ResponseEntity<ItemResponse> getItem(
@@ -67,7 +74,14 @@ public interface ItemApi {
   @Operation(summary = "Create a new menu item")
   @ApiResponses({
     @ApiResponse(responseCode = "201", description = "Item created successfully"),
-    @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content)
+    @ApiResponse(
+        responseCode = "400",
+        description =
+            "Invalid request data, such as a validation error or a non-existent category ID",
+        content =
+            @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiErrorResponse.class)))
   })
   @PostMapping
   ResponseEntity<CreateItemResponse> createItem(@RequestBody @Valid CreateItemRequest request);
