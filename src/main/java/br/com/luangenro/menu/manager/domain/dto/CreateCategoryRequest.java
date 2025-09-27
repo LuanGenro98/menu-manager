@@ -1,7 +1,29 @@
 package br.com.luangenro.menu.manager.domain.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Represents the data required to create a new category. This record is used as the request body
+ * for category creation endpoints.
+ *
+ * @param name The name of the category (e.g., "Desserts", "Beverages"). Cannot be blank.
+ * @param description A brief description of the category. Cannot be blank.
+ */
+@Schema(description = "Data required to create a new menu category.")
 public record CreateCategoryRequest(
-    @NotBlank @Size(max = 50) String name, @NotBlank @Size(max = 100) String description) {}
+    @Schema(
+            description = "The name of the category.",
+            example = "Beverages",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotBlank
+        @Size(max = 50)
+        String name,
+    @Schema(
+            description = "A short description of what the category includes.",
+            example = "Soft drinks, juices, and teas.",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotBlank
+        @Size(max = 100)
+        String description) {}
