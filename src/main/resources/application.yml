@@ -6,7 +6,3 @@ spring:
   liquibase:
     enabled: true
     change-log: /db/db.changelog-master.xml
-
-menumanager:
-  endpoints:
-    items: http://localhost:8080/items/
