@@ -3,31 +3,35 @@ package br.com.luangenro.menu.manager.controller;
 import br.com.luangenro.menu.manager.domain.dto.CreateDemandRequest;
 import br.com.luangenro.menu.manager.domain.dto.CreateDemandResponse;
 import br.com.luangenro.menu.manager.service.DemandService;
-import jakarta.validation.Valid;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+/**
+ * Controller implementation for the Demand API.
+ *
+ * <p>Handles HTTP requests and delegates the business logic to the {@link DemandService}.
+ */
 @RestController
-@RequestMapping("demands")
 @RequiredArgsConstructor
-public class DemandController {
+public class DemandController implements DemandApi {
 
   private final DemandService service;
 
-  @Value("${menumanager.endpoints.demands}")
-  private String DEMANDS_ENDPOINT;
-
-  @PostMapping("create")
-  ResponseEntity<CreateDemandResponse> createDemand(
-      @RequestBody @Valid CreateDemandRequest createDemandRequest) {
+  /** {@inheritDoc} */
+  @Override
+  public ResponseEntity<CreateDemandResponse> createDemand(
+      CreateDemandRequest createDemandRequest) {
     var createDemandResponse = service.createDemand(createDemandRequest);
-    return ResponseEntity.created(URI.create(DEMANDS_ENDPOINT + "/" + createDemandResponse.id()))
-        .body(createDemandResponse);
+
+    URI location =
+        ServletUriComponentsBuilder.fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(createDemandResponse.id())
+            .toUri();
+
+    return ResponseEntity.created(location).body(createDemandResponse);
   }
 }
