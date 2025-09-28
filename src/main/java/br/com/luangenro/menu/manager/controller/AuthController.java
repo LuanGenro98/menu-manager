@@ -16,16 +16,17 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Controller dedicated to handling user authentication. */
+/**
+ * Controller implementation for the Authentication API.
+ *
+ * <p>Handles the logic for user login and registration, delegating tasks to the appropriate
+ * services and managers.
+ */
 @RestController
-@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthController implements AuthApi {
 
   private final AuthenticationManager authenticationManager;
   private final UserDetailsService userDetailsService;
@@ -33,14 +34,9 @@ public class AuthController {
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
 
-  /**
-   * Authenticates a user and returns a JWT token upon success.
-   *
-   * @param request The authentication request containing username and password.
-   * @return A {@link ResponseEntity} with the JWT token.
-   */
-  @PostMapping("/login")
-  public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+  /** {@inheritDoc} */
+  @Override
+  public ResponseEntity<AuthResponse> login(AuthRequest request) {
     authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(request.username(), request.password()));
     final UserDetails user = userDetailsService.loadUserByUsername(request.username());
@@ -48,15 +44,10 @@ public class AuthController {
     return ResponseEntity.ok(new AuthResponse(token));
   }
 
-  /**
-   * Public endpoint for registering a new user in the system. The user's password will be securely
-   * hashed before being stored.
-   *
-   * @param userRequest The request body containing the new user's credentials and role.
-   * @return A {@link ResponseEntity} with the details of the created user and a 201 Created status.
-   */
-  @PostMapping("/register")
-  public ResponseEntity<UserResponse> registerUser(@RequestBody UserRequest userRequest) {
+  /** {@inheritDoc} */
+  @Override
+  public ResponseEntity<UserResponse> registerUser(UserRequest userRequest) {
+    // TODO: Add logic to check if username already exists to return a 400 Bad Request.
     User user =
         User.builder()
             .username(userRequest.username())
