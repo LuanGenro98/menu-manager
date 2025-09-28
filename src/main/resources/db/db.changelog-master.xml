@@ -4,5 +4,6 @@
     <include file="2-create-item-table-20240301.yaml" relativeToChangelogFile="true" />
     <include file="3-create-demand-table-20240430.yaml" relativeToChangelogFile="true" />
     <include file="4-create-demand-item-table-20240430.yaml" relativeToChangelogFile="true" />
+    <include file="5-create-users-table-20250928.yaml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>

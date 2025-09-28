@@ -1,8 +1,14 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/menu_manager?createDatabaseIfNotExist=true
-    username:
-    password:
+    url: jdbc:postgresql://localhost:5432/menu_manager
+    username: admin
+    password: admin
+  jpa:
+    hibernate:
+      ddl-auto: validate
   liquibase:
     enabled: true
     change-log: /db/db.changelog-master.xml
+
+jwt:
+  secret-key: vvbqYhV35neIoAsRNR0kjIyL3kIVAMiUGK4oOkjPRIg=

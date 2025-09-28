@@ -38,7 +38,7 @@ public class DemandService {
             .tableNumber(demandRequest.tableNumber())
             //            .price(demandedItems.stream().mapToDouble(item -> item.getPrice()).sum())
             .price(new BigDecimal(0))
-            //TODO: Ajustar
+            // TODO: Ajustar
             .build();
 
     demandRepository.save(demand);

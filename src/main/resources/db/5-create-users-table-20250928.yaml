@@ -1,0 +1,34 @@
+databaseChangeLog:
+  - changeSet:
+      id: 5-create-users-table
+      author: luan.genro
+      changes:
+        - createTable:
+            tableName: users
+            schemaName: public
+            columns:
+              - column:
+                  name: id
+                  type: serial
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: username
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+      rollback:
+        - dropTable:
+            tableName: users

@@ -1,10 +1,34 @@
+version: '3.8'
+
 services:
+  # Serviço do Banco de Dados PostgreSQL
   db:
-    image: postgres
-    volumes:
-      - ./01-create-database.sql:/docker-entrypoint-initdb.d/01-create-database.sql
+    image: postgres:16-alpine      # 📌 VERSÃO FIXA: Para builds consistentes, evite a tag 'latest'.
+    container_name: menu-manager-db
     environment:
-      POSTGRES_USER:
-      POSTGRES_PASSWORD:
+      - POSTGRES_DB=menu_manager   # ✨ SIMPLIFICADO: Cria o banco 'menu_manager' automaticamente.
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
     ports:
-      - 5432:5432
+      - "5432:5432"
+    volumes:
+      - menu_manager_data:/var/lib/postgresql/data # Volume para persistir os dados
+
+    # 🚀 BÔNUS: Serviço da sua Aplicação Spring Boot
+    # Descomente e ajuste se quiser rodar sua app via Docker Compose também.
+  app:
+    build: . # Constrói a imagem a partir do Dockerfile na raiz do projeto
+    container_name: menu-manager-app
+    depends_on:
+      - db # Garante que o banco inicie antes
+    ports:
+      - "8080:8080"
+    environment:
+      # A app dentro do Docker se conecta ao 'db' pelo nome do serviço
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/menu_manager
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=admin
+
+# Define o volume nomeado para persistência
+volumes:
+  menu_manager_data:
