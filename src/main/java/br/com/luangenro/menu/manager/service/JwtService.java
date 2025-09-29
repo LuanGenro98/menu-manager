@@ -36,7 +36,7 @@ public class JwtService {
    * @return The username (subject) from the token.
    */
   public String extractUsername(String token) {
-    log.info("Attempting to extract username from token.");
+    log.debug("Attempting to extract username from token.");
     return extractClaim(token, Claims::getSubject);
   }
 
@@ -47,7 +47,7 @@ public class JwtService {
    * @return A new JWT token string.
    */
   public String generateToken(UserDetails userDetails) {
-    log.info("Generating new JWT token for user: {}", userDetails.getUsername());
+    log.debug("Generating new JWT token for user: {}", userDetails.getUsername());
     String token =
         Jwts.builder()
             .subject(userDetails.getUsername())
@@ -55,7 +55,7 @@ public class JwtService {
             .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME_MS))
             .signWith(getSignInKey())
             .compact();
-    log.info("Token generated successfully for user: {}", userDetails.getUsername());
+    log.debug("Token generated successfully for user: {}", userDetails.getUsername());
     return token;
   }
 
@@ -67,7 +67,7 @@ public class JwtService {
    * @return True if the token is valid, false otherwise.
    */
   public boolean isTokenValid(String token, UserDetails userDetails) {
-    log.info("Validating token for user: {}", userDetails.getUsername());
+    log.debug("Validating token for user: {}", userDetails.getUsername());
     try {
       final String username = extractUsername(token);
       boolean isTokenValid = username.equals(userDetails.getUsername()) && !isTokenExpired(token);

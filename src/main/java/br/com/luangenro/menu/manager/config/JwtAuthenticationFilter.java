@@ -36,19 +36,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     final String authHeader = request.getHeader("Authorization");
     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-      log.info("No JWT token found in Authorization header for path: {}", request.getRequestURI());
+      log.debug("No JWT token found in Authorization header for path: {}", request.getRequestURI());
       filterChain.doFilter(request, response);
       return;
     }
 
     final String jwt = authHeader.substring(7);
     final String username = jwtService.extractUsername(jwt);
-    log.info("Extracted username '{}' from JWT token.", username);
+    log.debug("Extracted username '{}' from JWT token.", username);
 
     if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
       UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
       if (jwtService.isTokenValid(jwt, userDetails)) {
-        log.info(
+        log.debug(
             "JWT token is valid. Setting security context for user '{}'.",
             userDetails.getUsername());
         UsernamePasswordAuthenticationToken authToken =
