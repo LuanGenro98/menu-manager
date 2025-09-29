@@ -1,6 +1,5 @@
 package br.com.luangenro.menu.manager.service;
 
-import br.com.luangenro.menu.manager.domain.dto.*;
 import br.com.luangenro.menu.manager.domain.dto.CreateItemRequest;
 import br.com.luangenro.menu.manager.domain.dto.CreateItemResponse;
 import br.com.luangenro.menu.manager.domain.dto.ItemResponse;
@@ -12,15 +11,17 @@ import br.com.luangenro.menu.manager.exception.ItemNotFoundException;
 import br.com.luangenro.menu.manager.mapper.ItemMapper;
 import br.com.luangenro.menu.manager.repository.CategoryRepository;
 import br.com.luangenro.menu.manager.repository.ItemRepository;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /** Service layer responsible for business logic related to menu items. */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ItemService {
 
   private final ItemRepository itemRepository;
@@ -34,13 +35,15 @@ public class ItemService {
    * @return An {@link ItemResponse} containing the item details.
    * @throws ItemNotFoundException if no item with the given ID is found.
    */
-  @Transactional
+  @Transactional(readOnly = true)
   public ItemResponse getItem(int id) {
+    log.info("Fetching item with ID: {}", id);
     Item item =
         itemRepository
             .findById(id)
             .orElseThrow(
                 () -> new ItemNotFoundException("Item with ID %d not found.".formatted(id)));
+    log.info("Found item with ID {} and name '{}'.", id, item.getName());
     return mapper.toItemResponse(item);
   }
 
@@ -50,14 +53,17 @@ public class ItemService {
    * @param categoryId An optional ID to filter items by a specific category. Can be null.
    * @return A list of {@link ItemResponse}. Returns an empty list if no items are found.
    */
-  @Transactional
+  @Transactional(readOnly = true)
   public List<ItemResponse> getItems(Integer categoryId) {
     List<Item> items;
     if (categoryId != null) {
+      log.info("Fetching all items for category ID: {}", categoryId);
       items = itemRepository.findByCategoryId(categoryId);
     } else {
+      log.info("Fetching all items.");
       items = itemRepository.findAll();
     }
+    log.info("Found {} items.", items.size());
     return items.stream().map(mapper::toItemResponse).toList();
   }
 
@@ -70,6 +76,10 @@ public class ItemService {
    */
   @Transactional
   public CreateItemResponse createItem(CreateItemRequest request) {
+    log.info(
+        "Attempting to create a new item with name: '{}' in category ID: {}",
+        request.name(),
+        request.categoryId());
     Category category =
         categoryRepository
             .findById(request.categoryId())
@@ -78,6 +88,8 @@ public class ItemService {
                     new CategoryNotFoundException(
                         "Cannot create item. Category with ID %d not found."
                             .formatted(request.categoryId())));
+
+    log.debug("Category '{}' found for the new item.", category.getName());
 
     var item =
         Item.builder()
@@ -88,7 +100,10 @@ public class ItemService {
             .category(category)
             .build();
 
+    log.debug("Item entity to be saved: {}", item);
     var savedItem = itemRepository.save(item);
+    log.info("Item '{}' created successfully with ID: {}.", savedItem.getName(), savedItem.getId());
+
     return new CreateItemResponse(savedItem.getId(), savedItem.getName());
   }
 
@@ -103,6 +118,7 @@ public class ItemService {
    */
   @Transactional
   public ItemResponse updateItem(int id, UpdateItemRequest request) {
+    log.info("Attempting to update item with ID: {}", id);
     Item itemToUpdate =
         itemRepository
             .findById(id)
@@ -110,6 +126,8 @@ public class ItemService {
                 () ->
                     new ItemNotFoundException(
                         "Cannot update. Item with ID %d not found.".formatted(id)));
+
+    log.debug("Found item to update. Current state: {}", itemToUpdate);
 
     Category category =
         categoryRepository
@@ -120,12 +138,16 @@ public class ItemService {
                         "Cannot update item. Category with ID %d not found."
                             .formatted(request.categoryId())));
 
+    log.debug("Found new category '{}' for the item.", category.getName());
+
     itemToUpdate.setName(request.name());
     itemToUpdate.setDescription(request.description());
     itemToUpdate.setPrice(request.price());
     itemToUpdate.setCategory(category);
 
     Item updatedItem = itemRepository.save(itemToUpdate);
+    log.info("Item with ID {} updated successfully.", updatedItem.getId());
+
     return mapper.toItemResponse(updatedItem);
   }
 
@@ -137,9 +159,11 @@ public class ItemService {
    */
   @Transactional
   public void deleteItem(int id) {
+    log.info("Attempting to delete item with ID: {}", id);
     if (!itemRepository.existsById(id)) {
       throw new ItemNotFoundException("Cannot delete. Item with ID %d not found.".formatted(id));
     }
     itemRepository.deleteById(id);
+    log.info("Item with ID {} deleted successfully.", id);
   }
 }

@@ -9,11 +9,13 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /** Service layer responsible for business logic related to categories. */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CategoryService {
 
   private final CategoryRepository repository;
@@ -27,12 +29,14 @@ public class CategoryService {
    * @throws CategoryNotFoundException if no category with the given ID is found.
    */
   public CategoryResponse getCategory(int id) {
+    log.info("Fetching category with ID: {}", id);
     Category category =
         repository
             .findById(id)
             .orElseThrow(
                 () ->
                     new CategoryNotFoundException("Category with ID %d not found.".formatted(id)));
+    log.info("Found category with ID {} and name '{}'.", id, category.getName());
     return mapper.toCategoryResponse(category);
   }
 
@@ -42,7 +46,10 @@ public class CategoryService {
    * @return A list of {@link CategoryResponse}. Returns an empty list if no categories are found.
    */
   public List<CategoryResponse> getCategories() {
-    return repository.findAll().stream().map(mapper::toCategoryResponse).toList();
+    log.info("Fetching all categories.");
+    List<Category> categories = repository.findAll();
+    log.info("Found {} categories.", categories.size());
+    return categories.stream().map(mapper::toCategoryResponse).toList();
   }
 
   /**
@@ -53,6 +60,7 @@ public class CategoryService {
    */
   @Transactional
   public CreateCategoryResponse createCategory(CreateCategoryRequest request) {
+    log.info("Attempting to create a new category with name: {}", request.name());
     var category =
         Category.builder()
             .uuid(UUID.randomUUID())
@@ -61,6 +69,10 @@ public class CategoryService {
             .build();
 
     var savedCategory = repository.save(category);
+    log.info(
+        "Category '{}' created successfully with ID: {}",
+        savedCategory.getName(),
+        savedCategory.getId());
 
     return CreateCategoryResponse.builder()
         .id(savedCategory.getId())
@@ -78,6 +90,7 @@ public class CategoryService {
    */
   @Transactional
   public CategoryResponse updateCategory(int id, UpdateCategoryRequest request) {
+    log.info("Attempting to update category with ID: {}", id);
     Category categoryToUpdate =
         repository
             .findById(id)
@@ -86,10 +99,13 @@ public class CategoryService {
                     new CategoryNotFoundException(
                         "Cannot update. Category with ID %d not found.".formatted(id)));
 
+    log.debug("Found category to update. Current state: {}", categoryToUpdate);
+
     categoryToUpdate.setName(request.name());
     categoryToUpdate.setDescription(request.description());
 
     Category updatedCategory = repository.save(categoryToUpdate);
+    log.info("Category with ID {} updated successfully.", updatedCategory.getId());
 
     return mapper.toCategoryResponse(updatedCategory);
   }
@@ -102,10 +118,12 @@ public class CategoryService {
    */
   @Transactional
   public void deleteCategory(int id) {
+    log.info("Attempting to delete category with ID: {}", id);
     if (!repository.existsById(id)) {
       throw new CategoryNotFoundException(
           "Cannot delete. Category with ID %d not found.".formatted(id));
     }
     repository.deleteById(id);
+    log.info("Category with ID {} deleted successfully.", id);
   }
 }

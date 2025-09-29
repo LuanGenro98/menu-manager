@@ -1,12 +1,17 @@
 package br.com.luangenro.menu.manager.service;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import java.util.Date;
 import java.util.function.Function;
 import javax.crypto.SecretKey;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -16,6 +21,7 @@ import org.springframework.stereotype.Service;
  * extraction.
  */
 @Service
+@Slf4j
 public class JwtService {
 
   @Value("${jwt.secret-key}")
@@ -30,6 +36,7 @@ public class JwtService {
    * @return The username (subject) from the token.
    */
   public String extractUsername(String token) {
+    log.info("Attempting to extract username from token.");
     return extractClaim(token, Claims::getSubject);
   }
 
@@ -40,12 +47,16 @@ public class JwtService {
    * @return A new JWT token string.
    */
   public String generateToken(UserDetails userDetails) {
-    return Jwts.builder()
-        .subject(userDetails.getUsername())
-        .issuedAt(new Date(System.currentTimeMillis()))
-        .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME_MS))
-        .signWith(getSignInKey())
-        .compact();
+    log.info("Generating new JWT token for user: {}", userDetails.getUsername());
+    String token =
+        Jwts.builder()
+            .subject(userDetails.getUsername())
+            .issuedAt(new Date(System.currentTimeMillis()))
+            .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME_MS))
+            .signWith(getSignInKey())
+            .compact();
+    log.info("Token generated successfully for user: {}", userDetails.getUsername());
+    return token;
   }
 
   /**
@@ -56,12 +67,29 @@ public class JwtService {
    * @return True if the token is valid, false otherwise.
    */
   public boolean isTokenValid(String token, UserDetails userDetails) {
-    final String username = extractUsername(token);
-    return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    log.info("Validating token for user: {}", userDetails.getUsername());
+    try {
+      final String username = extractUsername(token);
+      boolean isTokenValid = username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+      if (!isTokenValid) {
+        log.warn(
+            "Token validation failed for user '{}'. Username match: {}, Token expired: {}.",
+            userDetails.getUsername(),
+            username.equals(userDetails.getUsername()),
+            isTokenExpired(token));
+      }
+      return isTokenValid;
+    } catch (Exception e) {
+      return false;
+    }
   }
 
   private boolean isTokenExpired(String token) {
-    return extractClaim(token, Claims::getExpiration).before(new Date());
+    boolean isExpired = extractClaim(token, Claims::getExpiration).before(new Date());
+    if (isExpired) {
+      log.warn("Token has expired. Expiration: {}", extractClaim(token, Claims::getExpiration));
+    }
+    return isExpired;
   }
 
   private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -70,7 +98,20 @@ public class JwtService {
   }
 
   private Claims extractAllClaims(String token) {
-    return Jwts.parser().verifyWith(getSignInKey()).build().parseSignedClaims(token).getPayload();
+    try {
+      return Jwts.parser().verifyWith(getSignInKey()).build().parseSignedClaims(token).getPayload();
+    } catch (MalformedJwtException e) {
+      log.warn("Invalid JWT token format: {}", e.getMessage());
+    } catch (ExpiredJwtException e) {
+      log.warn("JWT token has expired: {}", e.getMessage());
+    } catch (UnsupportedJwtException e) {
+      log.warn("Unsupported JWT token: {}", e.getMessage());
+    } catch (IllegalArgumentException e) {
+      log.warn("JWT claims string is empty or null: {}", e.getMessage());
+    } catch (SignatureException e) {
+      log.warn("JWT signature validation failed: {}", e.getMessage());
+    }
+    throw new IllegalStateException("Invalid JWT token");
   }
 
   private SecretKey getSignInKey() {
