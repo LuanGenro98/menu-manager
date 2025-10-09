@@ -3,6 +3,7 @@ package br.com.luangenro.menu.manager.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -12,11 +13,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 /**
  * Main configuration class for application security using JWT. This class is responsible for
- * configuring the security filter chain and HTTP security rules.
+ * configuring the security filter chain and HTTP security rules. This configuration is active for
+ * any profile EXCEPT 'no-auth'.
  */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@Profile("!no-auth")
 public class SecurityConfig {
 
   private final JwtAuthenticationFilter jwtAuthFilter;

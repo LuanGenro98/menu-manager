@@ -1,4 +1,7 @@
 spring:
+  profiles:
+    active: "" # Para ativar a segurança, deixe em branco ou remova a linha
+    # active: "no-auth" # Para desativar a segurança, use esta linha
   datasource:
     url: jdbc:postgresql://localhost:5432/menu_manager
     username: admin

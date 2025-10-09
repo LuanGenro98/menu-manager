@@ -27,7 +27,9 @@ Bem-vindo à API do Menu Manager! Esta é uma API RESTful completa construída c
 ---
 ## 🚀 Como Rodar o Projeto
 
-Siga estes passos para ter o ambiente completo rodando na sua máquina.
+Existem duas maneiras de executar o projeto: com Docker (recomendado para simplicidade) ou localmente (ideal para quem não tem Docker).
+
+### **Opção 1: Rodar com Docker (Recomendado)**
 
 ### Pré-requisitos
 * [Docker](https://www.docker.com/products/docker-desktop/)
@@ -44,7 +46,7 @@ Siga estes passos para ter o ambiente completo rodando na sua máquina.
     ```
 
 2.  **Configure a Chave Secreta do JWT**
-    Crie o arquivo `application.properties` dentro de `src/main/resources/`. Você pode copiar o conteúdo do arquivo `application.properties.example` (se houver) ou criar um novo com o conteúdo abaixo.
+    Crie o arquivo `application.yaml` dentro de `src/main/resources/`. Você pode copiar o conteúdo do arquivo `application.yaml.example` (se houver) ou criar um novo com o conteúdo abaixo.
 
     **Importante**: Gere sua própria chave secreta! Abra um terminal e rode o comando abaixo para gerar uma chave segura:
     ```bash
@@ -52,7 +54,7 @@ Siga estes passos para ter o ambiente completo rodando na sua máquina.
     ```
     Copie o resultado e cole no arquivo.
 
-    **`src/main/resources/application.properties`**:
+    **`src/main/resources/application.yaml`**:
     ```properties
     # Cole a chave secreta gerada pelo comando openssl aqui
     jwt.secret-key=SUA_CHAVE_GERADA_AQUI_EXEMPLO:Fq2/s8D+A4zG8L5N2aE9...
@@ -70,11 +72,79 @@ Siga estes passos para ter o ambiente completo rodando na sua máquina.
     * 🐘 Seu **banco de dados PostgreSQL** estará disponível em: `localhost:5432`
 
 ---
+### **👨‍🏫 Opção 2: Rodar Localmente (Sem Docker)**
+
+Este guia destina-se a usuários que desejam executar a aplicação diretamente em sua máquina local.
+
+#### Pré-requisitos
+* [Java 21 (ou superior)](https://www.oracle.com/java/technologies/downloads/#java21)
+* [Maven 3.8+](https://maven.apache.org/install.html)
+* [PostgreSQL 14+](https://www.postgresql.org/download/)
+* [Git](https://git-scm.com/downloads)
+
+#### Passo 1: Configurar o Banco de Dados PostgreSQL
+Após instalar o PostgreSQL, você precisa criar o banco de dados e o usuário para a aplicação. Abra um terminal SQL (como o `psql`) e execute:
+
+```sql
+-- 1. Cria o banco de dados
+CREATE DATABASE menu_manager;
+
+-- 2. Cria um novo usuário com uma senha
+CREATE USER admin WITH ENCRYPTED PASSWORD 'admin';
+
+-- 3. Dá ao novo usuário todas as permissões sobre o banco
+GRANT ALL PRIVILEGES ON DATABASE menu_manager TO admin;
+```
+
+#### Passo 2: Clonar e Configurar a Aplicação
+
+1.  **Clone o repositório:**
+    ```bash
+    git clone https://github.com/LuanGenro98/menu-manager
+    cd menu-manager
+    ```
+
+2.  **Configure o `application.yaml`**:
+    Verifique se o arquivo `src/main/resources/application.yaml` está configurado para o banco de dados local.
+
+    ```properties
+    # Configuração da Conexão com o Banco de Dados Local
+    spring.datasource.url=jdbc:postgresql://localhost:5432/menu_manager
+    spring.datasource.username=admin
+    spring.datasource.password=admin
+
+    # Configuração do Liquibase e Hibernate
+    spring.jpa.hibernate.ddl-auto=validate
+    spring.liquibase.change-log=classpath:db/changelog/db.changelog-master.xml
+
+    # Chave secreta para JWT (gere a sua com 'openssl rand -base64 32')
+    jwt.secret-key=SUA_CHAVE_GERADA_AQUI
+    ```
+
+#### Passo 3: Executar a Aplicação
+Na raiz do projeto, execute o comando via Maven Wrapper:
+
+```bash
+# No Linux ou macOS
+./mvnw spring-boot:run
+
+# No Windows (Command Prompt)
+mvnw.cmd spring-boot:run
+```
+O Liquibase cuidará de criar todas as tabelas no primeiro boot.
+
+#### Passo 4: Acessar a Aplicação
+A aplicação estará disponível nos mesmos endereços:
+
+* **API**: `http://localhost:8080`
+* **Documentação Swagger**: `http://localhost:8080/swagger-ui/index.html#/`
+
+---
 ## 📚 Documentação da API (Swagger)
 
 A documentação completa e interativa da API está disponível através do Swagger UI. Após iniciar a aplicação, acesse:
 
-* **[http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)**
+* **[http://localhost:8080/swagger-ui/index.html#/](http://localhost:8080/swagger-ui/index.html#/)**
 
 Lá você poderá ver todos os endpoints, seus parâmetros, os corpos de requisição/resposta e testá-los diretamente.
 
@@ -134,3 +204,25 @@ Para fazer logout, simplesmente remova o token do `localStorage` do navegador.
 ---
 ### **Observação sobre CORS**
 O backend está configurado para aceitar requisições do frontend rodando em `http://localhost:3000`. Se o seu ambiente de desenvolvimento do frontend usar uma porta diferente, avise o desenvolvedor do backend para ajustar a configuração.
+
+---
+### ⚠️ Modo de Avaliação (Sem Segurança)
+
+Por padrão, a aplicação roda com o sistema de segurança JWT completo ativado. Caso encontre qualquer problema ou queira apenas focar nas funcionalidades de negócio durante a avaliação, é possível desativar a autenticação de forma simples:
+
+1.  **Abra o arquivo de configuração** localizado em `src/main/resources/application.yaml`.
+
+2.  **Adicione a seguinte linha** para ativar o perfil `no-auth`:
+
+    *`application.yaml`*:
+    ```yaml
+    spring:
+      profiles:
+        active: "no-auth"
+    ```
+
+3.  **Reinicie a aplicação**.
+
+Com o perfil `no-auth` ativo, todos os endpoints da API estarão abertos e acessíveis sem a necessidade de um token de autenticação. O botão "Authorize" no Swagger UI também será ocultado automaticamente.
+
+Para reativar a segurança, basta remover ou comentar a linha `spring.profiles.active` e reiniciar a aplicação.
