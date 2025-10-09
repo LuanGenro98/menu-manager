@@ -18,8 +18,8 @@ public class DemandItem {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private int id;
 
-  @ManyToOne
-  @JoinColumn(name = "demand_id")
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "demand_id", nullable = false)
   private Demand demand;
 
   @ManyToOne

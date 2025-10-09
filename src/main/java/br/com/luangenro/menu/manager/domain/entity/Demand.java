@@ -4,15 +4,20 @@ import br.com.luangenro.menu.manager.domain.enumeration.DemandStatus;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "demand", schema = "public")
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Demand {
 
   @Id
@@ -38,6 +43,11 @@ public class Demand {
   @Column(name = "table_number")
   private int tableNumber;
 
-  @OneToMany(mappedBy = "demand")
-  private List<DemandItem> demandItems;
+  @OneToMany(
+      mappedBy = "demand",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY)
+  @Builder.Default
+  private List<DemandItem> demandItems = new ArrayList<>();
 }

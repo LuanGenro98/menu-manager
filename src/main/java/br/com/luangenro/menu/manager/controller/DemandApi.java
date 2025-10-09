@@ -2,6 +2,9 @@ package br.com.luangenro.menu.manager.controller;
 
 import br.com.luangenro.menu.manager.domain.dto.CreateDemandRequest;
 import br.com.luangenro.menu.manager.domain.dto.CreateDemandResponse;
+import br.com.luangenro.menu.manager.domain.dto.DemandResponse;
+import br.com.luangenro.menu.manager.domain.dto.UpdateDemandStatusRequest;
+import br.com.luangenro.menu.manager.domain.enumeration.DemandStatus;
 import br.com.luangenro.menu.manager.exception.ApiErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,10 +13,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Defines the public contract for managing customer demands (orders).
@@ -53,4 +55,50 @@ public interface DemandApi {
   @PostMapping
   ResponseEntity<CreateDemandResponse> createDemand(
       @RequestBody @Valid CreateDemandRequest createDemandRequest);
+
+  /**
+   * Retrieves a single demand by its ID.
+   *
+   * @param id The unique identifier of the demand.
+   * @return A {@link ResponseEntity} with the demand details.
+   */
+  @Operation(summary = "Find a demand by its ID")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "Demand found"),
+    @ApiResponse(responseCode = "404", description = "Demand not found", content = @Content)
+  })
+  @GetMapping("/{id}")
+  ResponseEntity<DemandResponse> getDemand(@PathVariable int id);
+
+  /**
+   * Retrieves a list of all demands, optionally filtered by status.
+   *
+   * @param status (Optional) Filter demands by a specific status.
+   * @return A {@link ResponseEntity} with a list of demands.
+   */
+  @Operation(
+      summary = "List all demands",
+      description = "Lists all demands, can be filtered by status (e.g., ORDERED, PREPARING).")
+  @ApiResponse(responseCode = "200", description = "A list of demands")
+  @GetMapping
+  ResponseEntity<List<DemandResponse>> getAllDemands(
+      @RequestParam(required = false) DemandStatus status);
+
+  /**
+   * Updates the status of an existing demand.
+   *
+   * @param id The ID of the demand to update.
+   * @param request The request containing the new status.
+   * @return A {@link ResponseEntity} with the updated demand.
+   */
+  @Operation(
+      summary = "Update a demand's status",
+      description = "Protected endpoint for staff to update the order status.")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "Status updated successfully"),
+    @ApiResponse(responseCode = "404", description = "Demand not found", content = @Content)
+  })
+  @PatchMapping("/{id}/status")
+  ResponseEntity<DemandResponse> updateDemandStatus(
+      @PathVariable int id, @RequestBody @Valid UpdateDemandStatusRequest request);
 }

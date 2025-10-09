@@ -2,11 +2,16 @@ package br.com.luangenro.menu.manager.service;
 
 import br.com.luangenro.menu.manager.domain.dto.CreateDemandRequest;
 import br.com.luangenro.menu.manager.domain.dto.CreateDemandResponse;
+import br.com.luangenro.menu.manager.domain.dto.DemandResponse;
+import br.com.luangenro.menu.manager.domain.dto.UpdateDemandStatusRequest;
 import br.com.luangenro.menu.manager.domain.entity.Demand;
 import br.com.luangenro.menu.manager.domain.entity.DemandItem;
 import br.com.luangenro.menu.manager.domain.entity.Item;
 import br.com.luangenro.menu.manager.domain.enumeration.DemandStatus;
+import br.com.luangenro.menu.manager.exception.DemandNotFoundException;
 import br.com.luangenro.menu.manager.exception.ItemNotFoundException;
+import br.com.luangenro.menu.manager.mapper.DemandMapper;
+import br.com.luangenro.menu.manager.repository.DemandItemRepository;
 import br.com.luangenro.menu.manager.repository.DemandRepository;
 import br.com.luangenro.menu.manager.repository.ItemRepository;
 import jakarta.transaction.Transactional;
@@ -27,6 +32,8 @@ public class DemandService {
 
   private final DemandRepository demandRepository;
   private final ItemRepository itemRepository;
+  private final DemandMapper mapper;
+  private final DemandItemRepository demandItemRepository;
 
   /**
    * Creates a new customer demand based on the provided request data.
@@ -65,7 +72,6 @@ public class DemandService {
         demandRequest.itemsIds().size());
     log.debug("Received item IDs for new demand: {}", demandRequest.itemsIds());
 
-    // 📌 MELHORIA: Valida se todos os itens existem antes de prosseguir
     List<Item> demandedItems = new ArrayList<>();
     for (Integer itemId : demandRequest.itemsIds()) {
       Item item =
@@ -79,7 +85,6 @@ public class DemandService {
     }
     log.debug("Successfully fetched {} items from the database.", demandedItems.size());
 
-    // 📌 MELHORIA: Calcula o preço total do pedido
     BigDecimal totalPrice =
         demandedItems.stream().map(Item::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
     log.debug("Calculated total price for the demand: {}", totalPrice);
@@ -88,25 +93,20 @@ public class DemandService {
         Demand.builder()
             .uuid(UUID.randomUUID())
             .createdAt(Instant.now())
-            .status(DemandStatus.ORDERED)
+            .status(DemandStatus.RECEBIDO)
             .tableNumber(demandRequest.tableNumber())
-            .price(totalPrice) // Usa o preço calculado
+            .price(totalPrice)
             .build();
 
     log.debug("Demand entity to be saved: {}", demand);
     Demand savedDemand = demandRepository.save(demand);
 
-    // Cria a lista de itens do pedido (tabela de junção)
     var demandItems =
         demandedItems.stream()
             .map(item -> DemandItem.builder().item(item).demand(savedDemand).build())
             .collect(Collectors.toList());
 
-    // Salva todos os itens do pedido. O JpaRepository é otimizado para isso.
-    // O DemandItemRepository não é mais necessário aqui, o Spring gerencia o saveAll
-    // através do relacionamento, mas mantê-lo injetado é uma opção.
-    savedDemand.setDemandItems(demandItems);
-    demandRepository.save(savedDemand);
+    demandItemRepository.saveAll(demandItems);
 
     log.info(
         "Demand {} created successfully for table {} with a total price of {}.",
@@ -115,5 +115,69 @@ public class DemandService {
         savedDemand.getPrice());
 
     return new CreateDemandResponse(savedDemand.getId(), savedDemand.getTableNumber());
+  }
+
+  /**
+   * Retrieves a single demand by its ID.
+   *
+   * @param id The demand ID.
+   * @return A DTO representing the demand.
+   * @throws DemandNotFoundException if the demand does not exist.
+   */
+  public DemandResponse getDemand(int id) {
+    log.info("Fetching demand with ID: {}", id);
+    Demand demand =
+        demandRepository
+            .findByIdWithItems(id)
+            .orElseThrow(
+                () -> new DemandNotFoundException("Demand with ID %d not found.".formatted(id)));
+    return mapper.toDemandResponse(demand);
+  }
+
+  /**
+   * Retrieves all demands, optionally filtering by status.
+   *
+   * @param status An optional status to filter by.
+   * @return A list of demand DTOs.
+   */
+  public List<DemandResponse> getAllDemands(DemandStatus status) {
+    List<Demand> demands;
+    if (status != null) {
+      log.info("Fetching all demands with status: {}", status);
+      demands = demandRepository.findByStatus(status);
+    } else {
+      log.info("Fetching all demands.");
+      demands = demandRepository.findAllWithItems();
+    }
+    log.info("Found {} demands.", demands.size());
+    return demands.stream().map(mapper::toDemandResponse).toList();
+  }
+
+  /**
+   * Updates the status of a specific demand.
+   *
+   * @param id The ID of the demand to update.
+   * @param request The request with the new status.
+   * @return A DTO of the updated demand.
+   * @throws DemandNotFoundException if the demand does not exist.
+   */
+  @Transactional
+  public DemandResponse updateDemandStatus(int id, UpdateDemandStatusRequest request) {
+    log.info("Attempting to update status of demand ID {} to '{}'.", id, request.newStatus());
+    Demand demand =
+        demandRepository
+            .findById(id)
+            .orElseThrow(
+                () ->
+                    new DemandNotFoundException(
+                        "Cannot update. Demand with ID %d not found.".formatted(id)));
+
+    demand.setStatus(request.newStatus());
+    demand.setUpdatedAt(Instant.now());
+
+    Demand updatedDemand = demandRepository.save(demand);
+    log.info("Status of demand ID {} updated successfully to '{}'.", id, updatedDemand.getStatus());
+
+    return mapper.toDemandResponse(updatedDemand);
   }
 }
