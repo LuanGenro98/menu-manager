@@ -9,8 +9,11 @@ WORKDIR /app
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 
+RUN apt-get update && apt-get install dos2unix
+
 # Adiciona a permissão de execução ao script do Maven Wrapper
 RUN chmod +x ./mvnw
+RUN dos2unix ./mvnw
 
 # Baixa todas as dependências do projeto
 RUN ./mvnw dependency:go-offline
