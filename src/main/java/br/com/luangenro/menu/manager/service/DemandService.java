@@ -93,7 +93,7 @@ public class DemandService {
         Demand.builder()
             .uuid(UUID.randomUUID())
             .createdAt(Instant.now())
-            .status(DemandStatus.RECEBIDO)
+            .status(DemandStatus.ORDERED)
             .tableNumber(demandRequest.tableNumber())
             .price(totalPrice)
             .build();

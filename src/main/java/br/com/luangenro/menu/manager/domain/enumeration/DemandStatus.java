@@ -1,41 +1,41 @@
 package br.com.luangenro.menu.manager.domain.enumeration;
 
 /**
- * Representa os possíveis status do ciclo de vida de um Pedido (Demand) dentro do sistema.
+ * Represents the possible lifecycle statuses of a Demand (order) within the system.
  *
- * <p>Este enum é usado para rastrear o progresso de um pedido desde sua criação até sua finalização
- * ou cancelamento, permitindo que tanto o estabelecimento quanto o cliente acompanhem seu
- * andamento.
+ * <p>This enum is used to track the progress of an order from its creation to its completion or
+ * cancellation, allowing both the establishment and the customer to follow its progress.
  */
 public enum DemandStatus {
 
   /**
-   * O pedido foi criado e recebido com sucesso pelo sistema, mas ainda aguarda para ser iniciado
-   * pela cozinha. Este é o estado inicial de todo novo pedido.
+   * The order has been created and received by the system, but is still waiting to be prepared.
+   * This is the initial state for every new order.
    */
-  RECEBIDO,
+  ORDERED,
 
-  /** O pedido foi aceito e a cozinha iniciou o seu preparo. */
-  EM_PREPARO,
-
-  /**
-   * O pedido está finalizado na cozinha e pronto para ser retirado pelo garçom e servido à mesa.
-   */
-  PRONTO,
+  /** The order has been accepted and the kitchen has started its preparation. */
+  PREPARING,
 
   /**
-   * O pedido foi fisicamente entregue ao cliente na mesa. O próximo passo geralmente é o pagamento.
+   * The order is finished in the kitchen and ready to be picked up by the waiter and served to the
+   * table.
    */
-  ENTREGUE,
+  READY,
 
   /**
-   * O pedido foi pago pelo cliente. Este é um estado final para um fluxo de pedido bem-sucedido.
+   * The order has been physically delivered to the customer at the table. The next step is usually
+   * payment.
    */
-  PAGO,
+  SERVED,
+
+  /** The order has been paid by the customer. This is a final state for a successful order flow. */
+  PAID,
 
   /**
-   * O pedido foi cancelado, seja a pedido do cliente ou por uma decisão do estabelecimento (ex:
-   * falta de um item). Este é um estado final e interrompe o fluxo normal.
+   * The order has been canceled, either at the customer's request or by a decision of the
+   * establishment (e.g., an item is out of stock). This is a final state and interrupts the normal
+   * flow.
    */
-  CANCELADO
+  CANCELED
 }
