@@ -3,6 +3,28 @@
 Bem-vindo à API do Menu Manager! Esta é uma API RESTful completa construída com Spring Boot para gerenciar cardápios de restaurantes, incluindo categorias, itens, pedidos e autenticação de usuários.
 
 ---
+## 📊 Diagramas do Projeto
+
+Abaixo estão os diagramas visuais que detalham a arquitetura da aplicação e o modelo do banco de dados.
+
+### Diagrama de Arquitetura
+
+![diagrama-de-arquitetura.png](diagrama-de-arquitetura.png)
+
+### Diagrama de Entidade-Relacionamento (DER)
+
+![diagrama-de-classes.png](diagrama-de-classes.png)
+
+---
+## 🎬 Vídeo de Apresentação
+
+### Confira a nossa apresentação detalhada do projeto e suas funcionalidades:
+
+* [YouTube](https://www.youtube.com/watch?v=W-Zoigz2vMM)
+
+* [Google Drive](https://drive.google.com/file/d/1AarUkCqGTtH_6hyGr2WdV7JHDa--X153/view?usp=sharing)
+
+---
 ## ✨ Features
 
 * **Autenticação e Autorização**: Sistema de segurança robusto usando Spring Security e JWT.
