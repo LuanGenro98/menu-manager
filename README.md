@@ -11,7 +11,7 @@ Abaixo estão os diagramas visuais que detalham a arquitetura da aplicação e o
 
 ![diagrama-de-arquitetura.png](diagrama-de-arquitetura.png)
 
-### Diagrama de Entidade-Relacionamento (DER)
+### Diagrama de Classes da camada model
 
 ![diagrama-de-classes.png](diagrama-de-classes.png)
 
@@ -68,11 +68,11 @@ Existem duas maneiras de executar o projeto: com Docker (recomendado para simpli
     ```
 
 2.  **Configure a Chave Secreta do JWT**
-    Crie o arquivo `application.yml` dentro de `src/main/resources/`. Você pode copiar o conteúdo do arquivo `application.yml.example` (se houver) ou criar um novo com o conteúdo abaixo.
+    Edite o arquivo `application.yml` dentro de `src/main/resources/`.
 
     **Importante**: Gere sua própria chave secreta! Abra um terminal e rode o comando abaixo para gerar uma chave segura:
     ```bash
-    openssl rand -base64 32
+    openssl rand -base64 32 | tr -d '\n' | tr '+/' '-_'
     ```
     Copie o resultado e cole no arquivo.
 
