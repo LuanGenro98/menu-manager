@@ -46,7 +46,7 @@ Existem duas maneiras de executar o projeto: com Docker (recomendado para simpli
     ```
 
 2.  **Configure a Chave Secreta do JWT**
-    Crie o arquivo `application.yaml` dentro de `src/main/resources/`. Você pode copiar o conteúdo do arquivo `application.yaml.example` (se houver) ou criar um novo com o conteúdo abaixo.
+    Crie o arquivo `application.yml` dentro de `src/main/resources/`. Você pode copiar o conteúdo do arquivo `application.yml.example` (se houver) ou criar um novo com o conteúdo abaixo.
 
     **Importante**: Gere sua própria chave secreta! Abra um terminal e rode o comando abaixo para gerar uma chave segura:
     ```bash
@@ -54,7 +54,7 @@ Existem duas maneiras de executar o projeto: com Docker (recomendado para simpli
     ```
     Copie o resultado e cole no arquivo.
 
-    **`src/main/resources/application.yaml`**:
+    **`src/main/resources/application.yml`**:
     ```properties
     # Cole a chave secreta gerada pelo comando openssl aqui
     jwt.secret-key=SUA_CHAVE_GERADA_AQUI_EXEMPLO:Fq2/s8D+A4zG8L5N2aE9...
@@ -104,8 +104,8 @@ GRANT ALL PRIVILEGES ON DATABASE menu_manager TO admin;
     cd menu-manager
     ```
 
-2.  **Configure o `application.yaml`**:
-    Verifique se o arquivo `src/main/resources/application.yaml` está configurado para o banco de dados local.
+2.  **Configure o `application.yml`**:
+    Verifique se o arquivo `src/main/resources/application.yml` está configurado para o banco de dados local.
 
     ```properties
     # Configuração da Conexão com o Banco de Dados Local
@@ -210,11 +210,11 @@ O backend está configurado para aceitar requisições do frontend rodando em `h
 
 Por padrão, a aplicação roda com o sistema de segurança JWT completo ativado. Caso encontre qualquer problema ou queira apenas focar nas funcionalidades de negócio durante a avaliação, é possível desativar a autenticação de forma simples:
 
-1.  **Abra o arquivo de configuração** localizado em `src/main/resources/application.yaml`.
+1.  **Abra o arquivo de configuração** localizado em `src/main/resources/application.yml`.
 
 2.  **Adicione a seguinte linha** para ativar o perfil `no-auth`:
 
-    *`application.yaml`*:
+    *`application.yml`*:
     ```yaml
     spring:
       profiles:
