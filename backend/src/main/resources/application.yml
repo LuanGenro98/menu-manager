@@ -14,4 +14,4 @@ spring:
     change-log: /db/db.changelog-master.xml
 
 jwt:
-  secret-key: vvbqYhV35neIoAsRNR0kjIyL3kIVAMiUGK4oOkjPRIg=
+  secret-key: zB8ULkhG1UViwskFdxN1K47wnTTlyIS-B7WboEcycsI=%
