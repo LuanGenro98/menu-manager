@@ -1,14 +1,22 @@
-export function getSessionToken(): string | null {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem("token");
+"use client";
+
+import Cookies from "js-cookie";
+
+export function setToken(token: string) {
+  Cookies.set("token", token, {
+    expires: 7,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
+  });
 }
-  
-export function isAuthenticated(): boolean {
-    return !!getSessionToken();
+
+export function getToken() {
+  return Cookies.get("token");
 }
-  
+
 export function logout() {
-    localStorage.removeItem("token");
-    window.location.href = "/login";
+  Cookies.remove("token");
+  window.location.href = "/login";
 }
   

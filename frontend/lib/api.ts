@@ -1,27 +1,61 @@
+"use client"
+
+import Cookies from "js-cookie";
+
 const API_BASE_URL = process.env.URL_API ?? "http://localhost:8080";
 
-export async function apiPost<T>(endpoint: string, data: any): Promise<T> {
-    try {
+export async function apiPost(endpoint: string, data: any): Promise<any> {
+  try {
+    const url = `${API_BASE_URL}/api/v1/${endpoint}`;
 
-      let url = API_BASE_URL + "/api/v1/" + endpoint
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
 
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-  
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Request failed");
-      }
-  
-      return (await response.json()) as T;
-    } catch (error) {
-      console.error("API Error:", error);
-      throw error;
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return { error: true, message: errorData.message || "Request failed" };
     }
+
+    return await response.json();
+  } catch (error) {
+    console.error("API Error:", error);
+    return { error: true, message: (error as Error).message || "Unexpected error" };
   }
-  
+}
+
+export async function apiGet(endpoint: string): Promise<any> {
+  try {
+    const token = Cookies.get("token");
+
+    console.log(token);
+
+    const url = `${API_BASE_URL}/api/v1/${endpoint}`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+      },
+    });
+
+
+    console.log(response);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return { error: true, message: errorData.message || "Request failed" };
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("API Error:", error);
+    return { error: true, message: (error as Error).message || "Unexpected error" };
+  }
+}

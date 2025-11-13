@@ -7,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -18,8 +17,6 @@ import {
   Field,
   FieldDescription,
   FieldGroup,
-  FieldLabel,
-  FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import backgroundImage from "@/public/menu-manager-background.jpg";
@@ -29,6 +26,8 @@ import { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
 import { apiPost } from "@/lib/api"
 import { useRouter } from "next/navigation";
+import { toast } from 'sonner';
+import { setToken } from "@/lib/auth"
 
 export function LoginForm({
   className,
@@ -44,14 +43,16 @@ export function LoginForm({
   });
 
   async function onSubmit(data: any) {
+      const result = await apiPost("auth/login", data);
 
-    try {
-      const result = await apiPost<{ token: string }>("auth/login", data);
-      await localStorage.setItem("token", result.token);
+      if(result.error){
+        toast.error("Credenciais inválidas, tente novamente!");
+        return;
+      }
+
+      await setToken(result.token);
+
       router.push("/");
-    } catch (error) {
-      console.error("❌ Login failed:", error);
-    }
   }
 
   const [showPassword, setShowPassword] = useState(false);
