@@ -1,0 +1,47 @@
+databaseChangeLog:
+  - changeSet:
+      - id: 2-create-item-table
+        author: luan.genro
+        changes:
+          - createTable:
+              tableName: item
+              schemaName: public
+              columns:
+                - column:
+                    name: id
+                    type: serial
+                    constraints:
+                      nullable: false
+                      primaryKey: true
+                      primaryKeyName: item_id
+                - column:
+                    name: uuid
+                    type: uuid
+                    defaultValue: gen_random_uuid()
+                    constraints:
+                      nullable: false
+                - column:
+                    name: name
+                    type: varchar(50)
+                    constraints:
+                      nullable: false
+                - column:
+                    name: description
+                    type: varchar(100)
+                    constraints:
+                      nullable: false
+                - column:
+                    name: price
+                    type: numeric
+                    constraints:
+                      nullable: false
+                - column:
+                    name: category_id
+                    type: int
+                    constraints:
+                      nullable: false
+                      foreignKeyName: fk_category_id
+                      references: category(id)
+        rollback:
+          - dropTable:
+              tableName: item

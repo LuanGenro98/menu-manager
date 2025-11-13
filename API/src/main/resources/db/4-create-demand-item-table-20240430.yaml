@@ -1,0 +1,38 @@
+databaseChangeLog:
+  - changeSet:
+      - id: 4-create-demand-item-table
+        author: luan.genro
+        changes:
+          - createTable:
+              tableName: demand_item
+              schemaName: public
+              columns:
+                - column:
+                    name: id
+                    type: serial
+                    constraints:
+                      nullable: false
+                      primaryKey: true
+                      primaryKeyName: demand_item_id
+                - column:
+                    name: demand_id
+                    type: int
+                    constraints:
+                      nullable: false
+                      foreignKeyName: fk_demand_id
+                      references: demand(id)
+                - column:
+                    name: item_id
+                    type: int
+                    constraints:
+                      nullable: false
+                      foreignKeyName: fk_item_id
+                      references: item(id)
+                - column:
+                    name: item_amount
+                    type: int
+                    constraints:
+                      nullable: false
+        rollback:
+          - dropTable:
+              tableName: demand
