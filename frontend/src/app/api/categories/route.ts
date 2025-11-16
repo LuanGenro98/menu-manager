@@ -1,17 +1,12 @@
-import { Item } from "@/types/next-props";
 import { cookies } from "next/headers";
 
 const API_BASE_URL = process.env.URL_API ?? "http://localhost:8080";
 
-export async function GET(req: Request) {
+export async function GET() {
   const cookieStore = cookies();
-  const { searchParams } = new URL(req.url);
-  const category = searchParams.get("category");
   const token = (await cookieStore).get("token")?.value;
 
-  const url = category ? `${API_BASE_URL}api/v1/items?categoryId=${category}` : `${API_BASE_URL}api/v1/items`;
-
-  const response = await fetch(url, {
+  const response = await fetch(`${API_BASE_URL}api/v1/categories`, {
     headers: {
       "Content-Type": "application/json",
       "Accept": "application/json",
@@ -23,13 +18,14 @@ export async function GET(req: Request) {
   
   return Response.json(data);
 }
+
 export async function POST(req: Request) {
   const cookieStore = cookies();
   const token = (await cookieStore).get("token")?.value;
 
   const body = await req.json();
 
-  const response = await fetch(`${API_BASE_URL}api/v1/items`, {
+  const response = await fetch(`${API_BASE_URL}api/v1/categories`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -43,3 +39,4 @@ export async function POST(req: Request) {
   
   return Response.json(data);
 }
+  
