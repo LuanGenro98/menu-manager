@@ -43,16 +43,25 @@ export function LoginForm({
   });
 
   async function onSubmit(data: any) {
-      const result = await apiPost("auth/login", data);
 
-      if(result.error){
-        toast.error("Credenciais inválidas, tente novamente!");
-        return;
-      }
+    const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
 
-      await setToken(result.token);
+    const result = await response.json();
 
-      router.push("/");
+    if(result.error){
+      toast.error("Credenciais inválidas, tente novamente!");
+      return;
+    }
+
+    await setToken(result.token);
+
+    router.push("/");
   }
 
   const [showPassword, setShowPassword] = useState(false);
