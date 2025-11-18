@@ -1,0 +1,35 @@
+databaseChangeLog:
+  - changeSet:
+      - id: 1-create-category-table
+        author: luan.genro
+        changes:
+          - createTable:
+              tableName: category
+              schemaName: public
+              columns:
+                - column:
+                    name: id
+                    type: serial
+                    constraints:
+                      nullable: false
+                      primaryKey: true
+                      primaryKeyName: category_id
+                - column:
+                    name: uuid
+                    type: uuid
+                    defaultValue: gen_random_uuid()
+                    constraints:
+                      nullable: false
+                - column:
+                    name: name
+                    type: varchar(50)
+                    constraints:
+                      nullable: false
+                - column:
+                    name: description
+                    type: varchar(100)
+                    constraints:
+                      nullable: false
+        rollback:
+          - dropTable:
+              tableName: category

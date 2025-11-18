@@ -1,0 +1,50 @@
+databaseChangeLog:
+  - changeSet:
+      - id: 3-create-demand-table
+        author: luan.genro
+        changes:
+          - createTable:
+              tableName: demand
+              schemaName: public
+              columns:
+                - column:
+                    name: id
+                    type: serial
+                    constraints:
+                      nullable: false
+                      primaryKey: true
+                      primaryKeyName: demand_id
+                - column:
+                    name: uuid
+                    type: uuid
+                    defaultValue: gen_random_uuid()
+                    constraints:
+                      nullable: false
+                - column:
+                    name: created_at
+                    type: timestamptz
+                    constraints:
+                      nullable: false
+                - column:
+                    name: updated_at
+                    type: timestamptz
+                    constraints:
+                      nullable: true
+                - column:
+                    name: status
+                    type: varchar(50)
+                    constraints:
+                      nullable: false
+                - column:
+                    name: price
+                    type: numeric
+                    constraints:
+                      nullable: false
+                - column:
+                    name: table_number
+                    type: int
+                    constraints:
+                      nullable: false
+        rollback:
+          - dropTable:
+              tableName: demand
