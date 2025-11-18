@@ -11,3 +11,12 @@ export interface Category {
     name: string;
     description: string;
 }
+
+export interface Order {
+    itemsIds: array;
+    tableNumber: string;
+}
+
+export interface OrderStatus {
+    status: string;
+}

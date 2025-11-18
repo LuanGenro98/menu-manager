@@ -94,7 +94,7 @@ export default function ItemsContent() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-xl md:text-2xl font-bold">Itens</CardTitle>
-                        <div className="flex gap-4">
+                        <div className="flex items-end gap-4">
                           <SelectCategory onRefresh={loadItems} />
                           <DialogTrigger asChild>
                               <Button>
