@@ -3,30 +3,20 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { status } from "@/src/utils/statusOrders";
 
-export default function SelectCategory({ onRefresh }: { onRefresh: () => void }) {
+export default function SelectStatus({ onRefresh }: { onRefresh: () => void }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  const [categories, setCategories] = useState([]);
-  const selectedCategory = searchParams.get("category") ?? "all";
-
-  useEffect(() => {
-    async function loadCategories() {
-      const res = await fetch("/api/categories");
-      const data = await res.json();
-      setCategories(data);
-    }
-    loadCategories();
-  }, []);
+  const selectedCategory = searchParams.get("status") ?? "all";
 
   function handleSelectChange(value: string) {
     const params = new URLSearchParams(searchParams.toString());
 
     if (value === "all") {
-      params.delete("category");
+      params.delete("status");
     } else {
-      params.set("category", value);
+      params.set("status", value);
     }
 
     router.push(`?${params.toString()}`);
@@ -45,15 +35,15 @@ export default function SelectCategory({ onRefresh }: { onRefresh: () => void })
       <div className="w-42">
         <Select onValueChange={handleSelectChange} value={selectedCategory}>
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Selecione a categoria" />
+            <SelectValue placeholder="Selecione o status" />
           </SelectTrigger>
 
           <SelectContent className="w-full">
-            <SelectItem value="all">Todas categorias</SelectItem>
+            <SelectItem value="all">Selecione o status</SelectItem>
 
-            {categories.map(cat => (
-              <SelectItem key={cat.id} value={String(cat.id)}>
-                {cat.name}
+            {status.map(item => (
+              <SelectItem key={item.id} value={item.value}>
+                {item.label}
               </SelectItem>
             ))}
           </SelectContent>

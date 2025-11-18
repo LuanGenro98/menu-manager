@@ -37,30 +37,21 @@ export default function SelectCategory({ onRefresh }: { onRefresh: () => void })
   }, [searchParams]);
 
   return (
-    <>
-    <div className="d-flex items-start">
-      <label className="text-sm mb-2">
-          Filtrar por:
-      </label>
-      <div className="w-42">
-        <Select onValueChange={handleSelectChange} value={selectedCategory}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Selecione a categoria" />
-          </SelectTrigger>
+    <Select onValueChange={handleSelectChange} value={selectedCategory}>
+      <SelectTrigger>
+        <SelectValue placeholder="Selecione a categoria" />
+      </SelectTrigger>
 
-          <SelectContent className="w-full">
-            <SelectItem value="all">Todas categorias</SelectItem>
+      <SelectContent>
 
-            {categories.map(cat => (
-              <SelectItem key={cat.id} value={String(cat.id)}>
-                {cat.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+        <SelectItem value="all">Todas categorias</SelectItem>
 
-    </div>
-    </>
+        {categories.map(cat => (
+          <SelectItem key={cat.id} value={String(cat.id)}>
+            {cat.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
