@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Stack completa para a aplicação Menu Manager (EC2, Docker, Postgres)
+  no ambiente AWS Academy Sandbox.
+
+Resources:
+  # 1. O Firewall (Security Group)
+  MenuManagerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Libera portas 22 (SSH), 8080 (App) e 5432 (Banco)
+      SecurityGroupIngress:
+        # Regra do SSH (Porta 22)
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        # Regra da API (Porta 8080)
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          CidrIp: 0.0.0.0/0
+        # Regra do Postgres (Porta 5432)
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp: 0.0.0.0/0
+
+  # 2. O Servidor (EC2 Instance)
+  MenuManagerInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t3.micro
+      # Pega a AMI mais recente do Amazon Linux 2023 (evita que a AMI expire)
+      ImageId: ami-0cae6d6fe6048ca2c
+      KeyName: vockey # A chave padrão do AWS Academy Sandbox
+      IamInstanceProfile: LabInstanceProfile # O perfil IAM padrão do Sandbox
+      SecurityGroupIds:
+        - !Ref MenuManagerSecurityGroup
+
+      # 3. O "HD" (Volume EBS) + 4. Criptografia (KMS)
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 30 # Limite do Sandbox é 35GB
+            VolumeType: gp2
+            Encrypted: true # AQUI USAMOS O KMS! Mesmo se o botão não aparece.
+
+      # 5. O Script de Auto-Deploy (EC2 User Data)
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          # Atualiza os pacotes
+          yum update -y
+          
+          # Instala as ferramentas
+          yum install -y git docker
+          systemctl start docker
+          usermod -aG docker ec2-user
+          
+          # Instala o Docker Compose V1 (com hífen)
+          curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          chmod +x /usr/local/bin/docker-compose
+          
+          # Loga como o usuário 'ec2-user' para fazer o deploy
+          su - ec2-user -c "git clone https://github.com/LuanGenro98/menu-manager.git /home/ec2-user/menu-manager"
+          
+          # Sobe a aplicação
+          su - ec2-user -c "cd /home/ec2-user/menu-manager/backend && DOCKER_BUILDKIT=0 docker-compose up --build -d"
