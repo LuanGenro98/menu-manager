@@ -57,7 +57,7 @@ Agora é só aguardar. O CloudFormation fará todo o trabalho pesado:
 4.  Selecione-a e copie o **"Public IPv4 address"**.
 5.  Cole no seu navegador e acesse o Swagger UI:
 
-    `http://<IP_PÚBLICO_DA_EC2>:8080/swagger-ui.html`
+    `http://<IP_PÚBLICO_DA_EC2>:8080/swagger-ui/index.html`
 
 Se a página do Swagger carregar, o deploy automatizado foi um sucesso!
 
