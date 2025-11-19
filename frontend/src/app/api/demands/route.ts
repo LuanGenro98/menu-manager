@@ -6,8 +6,13 @@ const API_BASE_URL = process.env.URL_API ?? "http://localhost:8080";
 export async function GET(req: Request) {
   const cookieStore = cookies();
   const token = (await cookieStore).get("token")?.value;
+  const { searchParams } = new URL(req.url);
+  const status = searchParams.get("status");
 
-  const response = await fetch(`${API_BASE_URL}api/v1/demands`, {
+  const url = status ? `${API_BASE_URL}api/v1/demands?status=${status}` : `${API_BASE_URL}api/v1/demands`;
+
+
+  const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
       "Accept": "application/json",

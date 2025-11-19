@@ -49,7 +49,10 @@ export default function PedidosContent() {
 
   async function loadOrders() {
     try {
-      const res = await fetch('/api/demands', { method: "GET" });
+
+      const url = status ? `/api/demands?status=${status}` : `/api/demands`;
+
+      const res = await fetch(url, { method: "GET" });
 
       if (!res.ok) throw new Error("Failed to fetch items");
 
