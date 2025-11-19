@@ -4,8 +4,8 @@ spring:
     # active: "no-auth" # Para desativar a segurança, use esta linha
   datasource:
     url: jdbc:postgresql://localhost:5432/menu_manager
-    username: admin
-    password: admin
+    username: ${BD_USERNAME:admin}
+    password: ${BD_PASSWORD:admin}
   jpa:
     hibernate:
       ddl-auto: validate
