@@ -73,16 +73,6 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }){
                                             setIsOpen={setIsOpen}
                                             icon={<ShoppingCart className="w-6 h-6"/>}
                                         />
-
-                                        <SideBarLink 
-                                            href="/perfil"
-                                            label="Perfil"
-                                            pathname={pathname}
-                                            isCollapsed={isCollapsed}
-                                            setIsCollapsed={setIsCollapsed}
-                                            setIsOpen={setIsOpen}
-                                            icon={<Settings className="w-6 h-6"/>}
-                                        /> 
                                     </div>
                                     
                                     <SideBarLink 
@@ -134,19 +124,6 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }){
                                         setIsOpen={setIsOpen}
                                         icon={<ShoppingCart className="w-6 h-6"/>}
                                     />
-                                <span className="text-sm text-gray-400 font-medium mt-1 uppercase">
-                                    Configuracoes
-                                </span>
-
-                                <SideBarLink 
-                                    href="/perfil"
-                                    label="Perfil"
-                                    pathname={pathname}
-                                    isCollapsed={isCollapsed}
-                                    setIsCollapsed={setIsCollapsed}
-                                    setIsOpen={setIsOpen}
-                                    icon={<Settings className="w-6 h-6"/>}
-                                />
                             </nav>
                             </CollapsibleContent>
                         </Collapsible>

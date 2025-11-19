@@ -23,13 +23,18 @@ import { Button } from "@/components/ui/button"
 import { Pencil, Plus, X } from "lucide-react"
 import { DialogCategory } from "./dialog-category"
 import { toast } from "sonner"
-import { Item } from "@/types/next-props";
+
+interface Category {
+  id: string;
+  name: string;
+  description: string;
+}
 
 export default function CategoryContent() {
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingCategory, seteditingCategory] = useState<null>(null)
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
   async function handleDeleteItem(id: string){    
     const result = await fetch(`/api/categories/${id}`, {
@@ -47,8 +52,8 @@ export default function CategoryContent() {
     return;
   }
 
-  function handleEditItem(item: Item){
-      seteditingCategory(item);
+  function handleEditItem(item: Category){
+      setEditingCategory(item);
       setIsDialogOpen(true);
   }
 
@@ -87,24 +92,28 @@ export default function CategoryContent() {
                               </Button>
                         </DialogTrigger>
 
-
                         <DialogContent onInteractOutside={(e) => {
                             e.preventDefault();
                             setIsDialogOpen(false);
-                            seteditingCategory(null);
+                            setEditingCategory(null);
                         }}>
-                            <DialogCategory closeModal={ () => {
-                                setIsDialogOpen(false);
-                                seteditingCategory(null);
-                            }} onRefresh={loadCategories} categoryId={editingCategory ? editingCategory.id : undefined} initialValues={editingCategory ? {
-                                name: editingCategory.name,
-                                description: editingCategory.description,
-                            } : undefined} />
+                            <DialogCategory 
+                                closeModal={() => {
+                                    setIsDialogOpen(false);
+                                    setEditingCategory(null);
+                                }} 
+                                onRefresh={loadCategories} 
+                                categoryId={editingCategory?.id} 
+                                initialValues={editingCategory ? {
+                                    name: editingCategory.name,
+                                    description: editingCategory.description,
+                                } : undefined} 
+                            />
                         </DialogContent>
                 </CardHeader>
                 </Card>
 
-                { categories.map(item => (
+                {categories.map(item => (
                   <Card className="my-5" key={item.id}>
                     <CardContent>
                         <section className="space-y-2">
@@ -134,5 +143,5 @@ export default function CategoryContent() {
         </section>
     </Dialog>
     </>
-)
+  )
 }

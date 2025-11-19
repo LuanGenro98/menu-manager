@@ -26,14 +26,13 @@ interface DialogOrderProps {
     closeModal: () => void;
     onRefresh: () => void;
     orderId?: string;
-    initialValues?: Order[]
+    initialValues?: Order
 }
 
-export function DialogOrder({ closeModal, initialValues, onRefresh, orderId}: DialogOrderProps){
-    console.log(initialValues);
+export function DialogOrder({ closeModal, initialValues, onRefresh, orderId}: any){
     const form = useDialogOrderForm({ initialValues: initialValues });
     const [loading, setLoading] = useState(false);
-    const [items, setItems] = useState([]);
+    const [items, setItems] = useState<Item[]>([]);
 
     useEffect(() => {
         async function loadItems() {
@@ -47,9 +46,6 @@ export function DialogOrder({ closeModal, initialValues, onRefresh, orderId}: Di
     }, [form]);
 
     async function onSubmit(values: DialogOrderFormData){
-        console.log(values);
-
-
         const data = {
             "tableNumber": values.tableNumber,
             "itemsIds": values.itemsIds,

@@ -3,12 +3,13 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Category } from "@/types/next-props";
 
 export default function SelectCategory({ onRefresh }: { onRefresh: () => void }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const selectedCategory = searchParams.get("category") ?? "all";
 
   useEffect(() => {

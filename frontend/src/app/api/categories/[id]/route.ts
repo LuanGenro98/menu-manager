@@ -1,14 +1,15 @@
 import { cookies } from "next/headers";
+import { NextRequest } from "next/server";
 
 const API_BASE_URL = process.env.URL_API ?? "http://localhost:8080";
 
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const cookieStore = cookies();
-  const token = (await cookieStore).get("token")?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
 
   const body = await req.json();
 
@@ -27,12 +28,12 @@ export async function PUT(
 }
 
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const cookieStore = cookies();
-  const token = (await cookieStore).get("token")?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
 
   const response = await fetch(`${API_BASE_URL}api/v1/categories/${id}`, {
     method: "DELETE",

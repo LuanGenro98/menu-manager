@@ -1,12 +1,14 @@
 import { cookies } from "next/headers";
+import { NextRequest } from "next/server";
 
 const API_BASE_URL = process.env.URL_API ?? "http://localhost:8080";
 
 export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+    
   const cookieStore = cookies();
   const token = (await cookieStore).get("token")?.value;
 

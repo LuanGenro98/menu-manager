@@ -49,9 +49,6 @@ export async function apiGet(endpoint: string): Promise<any> {
       },
     });
 
-
-    console.log(response);
-
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       return { error: true, message: errorData.message || "Request failed" };
