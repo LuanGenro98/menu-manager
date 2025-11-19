@@ -36,7 +36,6 @@ Edite o arquivo `.env` e defina os valores necessários:
 
 ```
 API_URL=http://localhost:8000
-API_KEY=sua_chave_aqui
 ```
 
 ---
