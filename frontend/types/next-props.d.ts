@@ -1,5 +1,5 @@
 export interface Item {
-    id?: int | undefined,
+    id: int,
     name: string,
     description: string,
     price: string;
@@ -7,16 +7,22 @@ export interface Item {
 }
 
 export interface Category {
-    id?: int;
+    id: number;
     name: string;
     description: string;
+    items: Item[];
 }
-
+  
 export interface Order {
-    itemsIds: array;
+    id?: number;
+    itemsIds: number[];
     tableNumber: string;
-}
+    items: Item[];
+    status: string;
+    price: number;
+  }
+  
 
-export interface OrderStatus {
+export interface OrderStatusProp {
     status: string;
 }

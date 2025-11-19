@@ -34,15 +34,13 @@ export default function ItemsContent() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<null>(null)
+  const [editingItem, setEditingItem] = useState<any>(null)
   const category = searchParams.get("category");
 
   async function handleDeleteItem(id: string){    
     const result = await fetch(`/api/items/${id}`, {
       method: "DELETE"
     });
-
-    console.log(result);
 
     if(!result.ok){
         toast.error("Falha ao remover item, tente novamente!");
@@ -69,9 +67,6 @@ export default function ItemsContent() {
       if (!res.ok) throw new Error("Failed to fetch items");
 
       const data = await res.json();
-
-      console.log("seta aqui:")
-      console.log(data);
 
       setItems(data);
     } catch (error) {

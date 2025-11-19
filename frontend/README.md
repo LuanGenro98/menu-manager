@@ -1,36 +1,103 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 Como Rodar o Projeto (Frontend)
 
-## Getting Started
+Bem-vindo ao guia oficial para executar o frontend do **Menu Manager** utilizando Docker!  
+Siga os passos abaixo e tenha o ambiente funcionando em poucos minutos.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## ✅ 1. PRÉ-REQUISITOS
+
+- Git instalado  
+- Docker e Docker Compose instalados  
+- Editor de texto (VSCode, IntelliJ, etc.) *(opcional)*  
+
+---
+
+## 📥 2. CLONAR O REPOSITÓRIO
+
+Abra o terminal e execute:
+
+```
+git clone https://github.com/LuanGenro98/menu-manager
+cd menu-manager/frontend
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ⚙️ 3. CONFIGURAR VARIÁVEIS DE AMBIENTE
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Crie seu arquivo `.env` baseado no arquivo de exemplo:
 
-## Learn More
+```
+cp .env.example .env
+```
 
-To learn more about Next.js, take a look at the following resources:
+Edite o arquivo `.env` e defina os valores necessários:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+API_URL=http://localhost:8000
+API_KEY=sua_chave_aqui
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🐳 4. BUILDAR E INICIAR O DOCKER
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+No diretório `frontend`, execute:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+docker compose up --build
+```
+
+Para rodar em segundo plano:
+
+```
+docker compose up --build -d
+```
+
+---
+
+## 🌐 5. ACESSAR A APLICAÇÃO
+
+Após o container iniciar, acesse:
+
+```
+http://localhost:3000
+```
+
+---
+
+## 🛑 6. PARAR O PROJETO
+
+Para derrubar os containers:
+
+```
+docker compose down
+```
+
+---
+
+## 📝 7. OBSERVAÇÕES IMPORTANTES
+
+- Certifique-se de que a porta **3000** não esteja em uso.  
+- Caso ocorra algum erro, veja os logs com:
+
+```
+docker compose logs -f
+```
+
+---
+
+## 🧩 8. PROBLEMAS COMUNS
+
+| Problema                     | Solução                                                                 |
+|------------------------------|-------------------------------------------------------------------------|
+| Porta 3000 em uso            | Finalize o processo ou altere a porta no `docker-compose.yml`.          |
+| Erro ao conectar com API     | Verifique as variáveis do arquivo `.env`.                               |
+| Containers não iniciam       | Execute `docker compose down -v` e tente novamente.                      |
+| Frontend não carrega         | Verifique se o backend está rodando e acessível na URL da API.          |
+
+---
+
+🎉 **Pronto! Seu ambiente está rodando com Docker de forma rápida e prática.**  
+Se precisar melhorar o README ou gerar versão em PDF/Markdown, posso ajudar!

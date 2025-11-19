@@ -4,22 +4,24 @@ import { useDialogOrderForm } from "./dialog-item-form"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { OrderStatus } from "@/types/next-props";
+import { Order, OrderStatusProp } from "@/types/next-props";
 import { status } from "@/src/utils/statusOrders";
 
 interface DialogOrderProps {
     onRefresh: () => void;
-    orderId?: string;
-    initialValues?: OrderStatus[]
+    orderId?: number;
+    initialValues: {
+        status: string;
+    };
 }
 
 export function OrderStatus({ initialValues, onRefresh, orderId}: DialogOrderProps){
     const form = useDialogOrderForm({ initialValues: initialValues });
 
-    async function changeStatus(value: OrderStatus){
+    async function changeStatus(value: OrderStatusProp){
         
         const data = {
-            "newStatus": value
+            "newStatus": value.status
         };
         
         const result = await fetch(`/api/demands/${orderId}/status`, {
@@ -54,10 +56,10 @@ export function OrderStatus({ initialValues, onRefresh, orderId}: DialogOrderPro
 
                             <FormControl>
                             <Select
-                                value={field.value || ""}
+                                value={String(field.value) || ""}
                                 onValueChange={(value) => {
                                     field.onChange(value);
-                                    changeStatus(value);
+                                    changeStatus({ status: value});
                                 }}
                             >
                                 <SelectTrigger>

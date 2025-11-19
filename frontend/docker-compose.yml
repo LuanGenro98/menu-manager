@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  nextapp:
+    build: .
+    container_name: menu-manager-front
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production

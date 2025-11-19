@@ -1,10 +1,11 @@
 import { cookies } from "next/headers";
+import { NextRequest } from "next/server";
 
 const API_BASE_URL = process.env.URL_API ?? "http://localhost:8080";
 
 export async function GET() {
-  const cookieStore = cookies();
-  const token = (await cookieStore).get("token")?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
 
   const response = await fetch(`${API_BASE_URL}api/v1/categories`, {
     headers: {
@@ -19,9 +20,9 @@ export async function GET() {
   return Response.json(data);
 }
 
-export async function POST(req: Request) {
-  const cookieStore = cookies();
-  const token = (await cookieStore).get("token")?.value;
+export async function POST(req: NextRequest) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
 
   const body = await req.json();
 
@@ -39,4 +40,3 @@ export async function POST(req: Request) {
   
   return Response.json(data);
 }
-  

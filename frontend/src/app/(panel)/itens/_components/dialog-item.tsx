@@ -15,11 +15,10 @@ interface DialogItemProps {
     closeModal: () => void;
     onRefresh: () => void;
     itemId?: string;
-    initialValues?: Item[]
+    initialValues?: Omit<Item, 'id'>
 }
 
 export function DialogItem({ closeModal, initialValues, onRefresh, itemId}: DialogItemProps){
-    console.log(initialValues);
     const [categories, setCategories] = useState<Category[]>([]);
     const form = useDialogItemForm({ initialValues: initialValues });
     const [loading, setLoading] = useState(false);
@@ -32,7 +31,6 @@ export function DialogItem({ closeModal, initialValues, onRefresh, itemId}: Dial
           setCategories(data);
     
           if (data.length === 1) {
-            console.log(data);
             form.setValue("category_id", String(data[0].id), { shouldValidate: true });
           }
         }

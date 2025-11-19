@@ -1,20 +1,18 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { DialogCategoryFormData, useDialogCategoryForm } from "./dialog-category-form"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Category, Item } from "@/types/next-props";
 
 interface DialogCategoryProps {
     closeModal: () => void;
     onRefresh: () => void;
     categoryId?: string;
-    initialValues?: Category[]
+    initialValues?: { name: string; description: string };
 }
 
 export function DialogCategory({ closeModal, initialValues, onRefresh, categoryId}: DialogCategoryProps){
@@ -28,8 +26,6 @@ export function DialogCategory({ closeModal, initialValues, onRefresh, categoryI
             "name": values.name,
             "description": values.description,
         }
-
-        console.log(categoryId);
 
         if(categoryId){
             const result = await fetch(`/api/categories/${categoryId}`, {

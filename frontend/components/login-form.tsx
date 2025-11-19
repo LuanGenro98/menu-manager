@@ -37,8 +37,8 @@ export function LoginForm({
 
   const form = useForm({
     defaultValues: {
-      username: "gregorystein10@hotmail.com",
-      password: "teste123",
+      username: "",
+      password: "",
     },
   });
 
@@ -130,9 +130,6 @@ export function LoginForm({
               <Field>
                 <Button type="submit">Login</Button>
               </Field>
-              <FieldDescription className="text-center">
-                Não possui conta? <a href="#">Clique aqui</a>
-              </FieldDescription>
             </FieldGroup>
           </form>
           </Form>

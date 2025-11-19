@@ -18,7 +18,7 @@ import { Plus } from "lucide-react"
 import { formatCurrency } from "@/src/utils/formatCurrency"
 import { DialogOrder } from "./dialog-order"
 import Image from "next/image";
-import { OrderStatus } from "./order-status";
+import { OrderStatus as OrderStatusComponent } from "./order-status";
 import { useSearchParams } from "next/navigation";
 
 import orderedImg from "@/public/menu-manager-ordered.png";
@@ -28,6 +28,7 @@ import servedImg from "@/public/menu-manager-served.png";
 import paidImg from "@/public/menu-manager-paid.png";
 import canceledImg from "@/public/menu-manager-canceled.png";
 import SelectStatus from "./select-status";
+import { Item, Order } from "@/types/next-props";
 
 const statusImages: Record<string, any> = {
   ORDERED: orderedImg,
@@ -40,10 +41,10 @@ const statusImages: Record<string, any> = {
 
 export default function PedidosContent() {
   const searchParams = useSearchParams();
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<null>(null)
+  const [editingItem, setEditingItem] = useState<any>(null)
   const status = searchParams.get("status");
 
   async function loadOrders() {
@@ -121,7 +122,12 @@ export default function PedidosContent() {
                         <span className="font-semibold">{item.tableNumber}</span>
                       </div>
 
-                      <OrderStatus onRefresh={loadOrders} orderId={item.id} initialValues={{status: item.status}} />
+                      <OrderStatusComponent 
+                        onRefresh={loadOrders} 
+                        orderId={item.id} 
+                        initialValues={{ status: item.status }} 
+                      />
+
                     </CardContent>
                   </Card>
                 //  ) : null

@@ -6,13 +6,15 @@ const formSchema = z.object({
     tableNumber: z.string().min(1, { message: "Nome é um campo obrigatório." }),
     itemsIds: z.array(z.number()).min(1, {
         message: "Selecione pelo menos um item.",
-      })
+    }),
+    status: z.string()
 })
 
 export interface UseDialogOrderFormProps {
     initialValues?: {
-        tableNumber: string;
-        itemsIds: Number[];
+        tableNumber?: string;
+        itemsIds?: number[];
+        status: string;
     }
 }
 
@@ -24,6 +26,7 @@ export function useDialogOrderForm({ initialValues }: UseDialogOrderFormProps){
         defaultValues: initialValues || {
             tableNumber: "",
             itemsIds: [],
+            status: "ORDERED"
         }
     })
 }
