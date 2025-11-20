@@ -5,6 +5,7 @@ Este documento detalha o processo de deploy **automatizado** da aplicação `men
 Este método substitui a criação manual da instância EC2. Em vez de 10 cliques, usamos 1 arquivo de template.
 
 ---
+
 ## 📋 Pré-requisitos
 
 1.  Acesso ao **AWS Academy Learner Lab/Sandbox Academy**.
@@ -12,6 +13,7 @@ Este método substitui a criação manual da instância EC2. Em vez de 10 clique
 3.  O arquivo `docker-compose.yml` (na pasta `backend/`) deve estar atualizado no seu repositório Git.
 
 ---
+
 ## ⚙️ Passo 1: Iniciar o Lab e o Console AWS
 
 1.  Faça login no portal **AWS Academy** e entre no seu curso.
@@ -19,7 +21,6 @@ Este método substitui a criação manual da instância EC2. Em vez de 10 clique
 3.  Clique no botão verde **"Start Lab"** e aguarde o status ficar "Ready".
 4.  Clique no botão cinza **"AWS"** para abrir o **AWS Management Console**.
 
----
 ## 🤖 Passo 2: Executar o CloudFormation (A Automação)
 
 1.  No Console AWS, verifique se você está na região **N. Virginia (us-east-1)**.
@@ -29,26 +30,32 @@ Este método substitui a criação manual da instância EC2. Em vez de 10 clique
 5.  Clique em **"Choose file"** e faça o upload do seu arquivo `template.yml` local.
 6.  Clique em **"Next"**.
 7.  Dê um nome para a stack, por exemplo: `MenuManagerStack`.
-8.  Clique em **"Next"** e, na página seguinte, em **"Submit"** (ou "Create stack").
+8.  Em **"Parâmetros"** no parâmetro **"SubnetIds"** selecione valores que estejam em Availability Zones (AZs) diferentes
+
+    - Exemplo: subnet-02c2d931d88c4f11a (us-east-1a) e subnet-0763e98daa8378dd3 (us-east-1b)
+
+9.  Clique em **"Next"** e, na página seguinte, em **"Submit"** (ou "Create stack").
 
 ---
+
 ## ⏳ Passo 3: Acompanhar o Deploy (A Mágica)
 
 Agora é só aguardar. O CloudFormation fará todo o trabalho pesado:
 
 1.  Você verá o status da sua stack como **`CREATE_IN_PROGRESS`**.
 2.  O CloudFormation vai ler seu `template.yml` e criar, em ordem:
-    * O Firewall (`MenuManagerSecurityGroup`).
-    * A Instância EC2, já com o **KMS (criptografia)** e o **IAM Profile** aplicados.
+    - O Firewall (`MenuManagerSecurityGroup`).
+    - A Instância EC2, já com o **KMS (criptografia)** e o **IAM Profile** aplicados.
 3.  Assim que a EC2 for criada, o script `UserData` (definido no template) será executado **automaticamente** dentro da máquina. Esse script:
-    * Instala Git, Docker e Docker Compose.
-    * Clona seu repositório do GitHub.
-    * Entra na pasta `backend/`.
-    * Roda o `docker-compose up --build -d` para você.
+    - Instala Git, Docker e Docker Compose.
+    - Clona seu repositório do GitHub.
+    - Entra na pasta `backend/`.
+    - Roda o `docker-compose up --build -d` para você.
 
 **Este processo leva de 5 a 10 minutos!** A máquina `t3.micro` é fraca e o build do Docker (compilando o Java) demora um pouco.
 
 ---
+
 ## ✅ Passo 4: Acessar a API (Vitória!)
 
 1.  Aguarde o status da stack no CloudFormation mudar para **`CREATE_COMPLETE`** (verde).
@@ -62,6 +69,7 @@ Agora é só aguardar. O CloudFormation fará todo o trabalho pesado:
 Se a página do Swagger carregar, o deploy automatizado foi um sucesso!
 
 ---
+
 ## (Opcional) Como Acessar a Máquina e Ver os Logs
 
 Se a API não responder após 10 minutos, você pode "entrar" na máquina para investigar o que deu errado.
@@ -84,26 +92,47 @@ Se a API não responder após 10 minutos, você pode "entrar" na máquina para i
 
 Uma vez dentro da máquina, você tem dois logs principais para olhar:
 
-* **Log 1: O Log do Script de Instalação (Cloud-Init)**
-  *Este log mostra se a instalação do Docker, Git ou o `git clone` falharam.*
-    ```bash
-    cat /var/log/cloud-init-output.log
-    ```
-  *Role até o final para ver os últimos comandos executados.*
+- **Log 1: O Log do Script de Instalação (Cloud-Init)**
+  _Este log mostra se a instalação do Docker, Git ou o `git clone` falharam._
 
+  ```bash
+  cat /var/log/cloud-init-output.log
+  ```
 
-* **Log 2: O Log da Aplicação (Docker Compose)**
-  *Este log mostra se a sua aplicação Spring Boot subiu corretamente.*
-    ```bash
-    # Primeiro, entre na pasta onde o docker-compose.yml está
-    cd /home/ec2-user/menu-manager/backend/
+  _Role até o final para ver os últimos comandos executados._
 
-    # Agora, veja os logs
-    docker-compose logs
-    ```
-  *Aqui você verá os logs do Spring Boot, do Liquibase, etc.*
+- **Log 2: O Log da Aplicação (Docker Compose)**
+  _Este log mostra se a sua aplicação Spring Boot subiu corretamente._
+
+  ```bash
+  # Primeiro, entre na pasta onde o docker-compose.yml está
+  cd /home/ec2-user/menu-manager/backend/
+
+  # Agora, veja os logs
+  docker-compose logs
+  ```
+
+  _Aqui você verá os logs do Spring Boot, do Liquibase, etc._
 
 ---
+
+## (Opcional) Como acessar o banco de dados
+
+Após conseguir acessar o swagger, com a aplicação rodando é possível acessar o banco de dados
+
+1. Na barra de busca do serviço da AWS, volte para serviço **CloudFormation**.
+2. Selecione a pilha que você criou anteriormente.
+3. Selecione a opção **"Saídas"**. Com isso deverá ver valores para se conectar com banco
+
+![saida-example](./image/output-example.png)
+
+4. Escolha um editor que permita conexão com banco. Exemplo: _DBeaver, pgAdmin..._
+5. Configure uma conexão conforme a imagem abaixo:
+
+![pg-admin-example](./image/connection-example.png)
+
+---
+
 ## ⚠️ Atenção: Ambiente Temporário
 
 Lembre-se que este ambiente do AWS Academy Sandbox **é temporário**. Assim que o timer do seu laboratório expirar, **todos os seus dados e sua stack do CloudFormation (incluindo a EC2) serão permanentemente excluídos.**
