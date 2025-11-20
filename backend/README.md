@@ -247,7 +247,6 @@ Por padrão, a aplicação roda com o sistema de segurança JWT completo ativado
 
 Com o perfil `no-auth` ativo, todos os endpoints da API estarão abertos e acessíveis sem a necessidade de um token de autenticação. O botão "Authorize" no Swagger UI também será ocultado automaticamente.
 
-<<<<<<< HEAD
 Para reativar a segurança, basta remover ou comentar a linha `spring.profiles.active` e reiniciar a aplicação.
 
 # 📦 Como Criar e Configurar um Bucket S3 na AWS para Uploads de Imagens
@@ -347,6 +346,3 @@ A URL final de cada imagem ficará assim:
 https://menu-manager-images-idAccount.s3.amazonaws.com/uploads/item-id
 ```
 ---
-=======
-Para reativar a segurança, basta remover ou comentar a linha `spring.profiles.active` e reiniciar a aplicação.
->>>>>>> 7e57ed6b904f64a89959525d9a234fa0ca3424dd
