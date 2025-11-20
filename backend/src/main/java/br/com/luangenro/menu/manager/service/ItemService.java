@@ -180,11 +180,12 @@ public class ItemService {
    */
   @Transactional
   public void deleteItem(int id) {
-    log.info("Attempting to delete item with ID: {}", id);
-    if (!itemRepository.existsById(id)) {
-      throw new ItemNotFoundException("Cannot delete. Item with ID %d not found.".formatted(id));
-    }
-    itemRepository.deleteById(id);
-    log.info("Item with ID {} deleted successfully.", id);
+      log.info("Attempting to delete item with ID: {}", id);
+      if (!itemRepository.existsById(id)) {
+          throw new ItemNotFoundException("Cannot delete. Item with ID %d not found.".formatted(id));
+      }
+      itemRepository.deleteById(id);
+      imageService.deleteImage("uploads/item-" + id);
+      log.info("Item with ID {} deleted successfully.", id);
   }
 }

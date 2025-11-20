@@ -22,4 +22,12 @@ public record ItemResponse(
     @Schema(
             description = "URL of the item's image",
             example = "https://s3.amazonaws.com/bucket/uploads/file.png")
-        String imageUrl) {}
+        String imageUrl,
+    @Schema(
+            description = "ID of the category this item belongs to.",
+            example = "3"
+    )
+    Integer categoryId,
+    @Schema(description = "Indicates whether the item has any associated orders.",
+            example = "true")
+    Boolean hasOrders) {}

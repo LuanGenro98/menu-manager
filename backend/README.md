@@ -248,3 +248,101 @@ Por padrão, a aplicação roda com o sistema de segurança JWT completo ativado
 Com o perfil `no-auth` ativo, todos os endpoints da API estarão abertos e acessíveis sem a necessidade de um token de autenticação. O botão "Authorize" no Swagger UI também será ocultado automaticamente.
 
 Para reativar a segurança, basta remover ou comentar a linha `spring.profiles.active` e reiniciar a aplicação.
+
+# 📦 Como Criar e Configurar um Bucket S3 na AWS para Uploads de Imagens
+
+Este guia explica passo a passo como criar um bucket na Amazon S3, configurá-lo com permissões adequadas e integrá-lo à sua aplicação utilizando as variáveis de ambiente AWS.
+
+---
+
+## 🚀 1. Criar um Bucket no Amazon S3
+
+1. Acesse o console AWS: **https://console.aws.amazon.com/s3**
+2. Clique em **Create bucket**.
+3. Configure:
+   - **Bucket name:** `menu-manager-images-{idAccountAmazon}`
+   - **AWS Region:** `us-east-1`
+4. Desmarque **Block all public access** (caso queira servir imagens publicamente).
+5. Clique em **Create bucket**.
+
+---
+
+## 🔒 2. Configurar a Policy do Bucket
+
+No bucket criado:
+
+1. Vá em **Permissions → Bucket Policy**
+2. Cole a seguinte política:
+
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowPublicRead",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::menu-manager-images-{IdAccountAmazon}/uploads/*"
+        },
+        {
+            "Sid": "AllowUserUploads",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::{IdAccountAmazon}:user/{User}"
+            },
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject"
+            ],
+            "Resource": "arn:aws:s3:::menu-manager-images-{IdAccountAmazon}/uploads/*"
+        }
+    ]
+}
+```
+
+Essa policy permite:
+- **Leitura pública** dos arquivos no diretório `uploads/`
+- **Bucket** para o ID usuário IAM `{IdAccountAmazon}`
+- **Uploads e leitura** para o usuário IAM `{User}`
+
+---
+
+## 👤 3. Criar Usuário IAM com Chave de Acesso
+
+1. Vá em **IAM → Users → Create User**
+2. Nome do usuário: `{User}`
+3. Selecione **Programmatic access**
+4. Em **Permissions**, adicione a política gerenciada:
+   - **AmazonS3FullAccess** (ou crie uma customizada mais restrita)
+5. Finalize e copie:
+   - **Access Key ID**
+   - **Secret Access Key**
+
+> ⚠️ Essas credenciais são necessárias para o backend enviar arquivos ao S3.
+
+---
+
+## ⚙️ 4. Variáveis de Ambiente Necessárias
+
+Configure no seu arquivo `application.yml`:
+
+```
+aws:
+  region: ${AWS_REGION:us-east-1}
+  s3:
+    bucket: ${AWS_BUCKET}
+  accessKey: ${AWS_ACCESS}
+  secretKey: ${AWS_SECRET}
+```
+
+---
+
+## 🌐 5. Como os Arquivos Ficarão Acessíveis Publicamente
+
+A URL final de cada imagem ficará assim:
+
+```
+https://menu-manager-images-idAccount.s3.amazonaws.com/uploads/item-id
+```
+---

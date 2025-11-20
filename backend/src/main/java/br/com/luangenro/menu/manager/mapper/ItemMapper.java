@@ -15,12 +15,16 @@ public class ItemMapper {
    * @return The corresponding {@code ItemResponse} DTO.
    */
   public ItemResponse toItemResponse(Item item) {
-    return ItemResponse.builder()
+      boolean hasOrders = item.getDemandItems() != null && !item.getDemandItems().isEmpty();
+
+      return ItemResponse.builder()
         .id(item.getId())
         .name(item.getName())
         .description(item.getDescription())
         .price(item.getPrice())
         .imageUrl(item.getImageUrl())
+            .categoryId(item.getCategory() != null ? item.getCategory().getId() : null)
+              .hasOrders(hasOrders)
         .build();
   }
 }
