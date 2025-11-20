@@ -11,10 +11,6 @@ export async function GET(req: Request) {
 
   const url = status ? `${API_BASE_URL}api/v1/demands?status=${status}` : `${API_BASE_URL}api/v1/demands`;
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 7e57ed6b904f64a89959525d9a234fa0ca3424dd
   const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
