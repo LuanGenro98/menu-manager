@@ -30,11 +30,9 @@ export async function POST(req: Request) {
   const incoming = await req.formData();
   const formData = new FormData();
 
-  // pegar o request (que chega como Blob)
   const request = incoming.get("request");
   if (request) formData.append("request", request);
 
-  // pegar image
   const image = incoming.get("image");
   if (image instanceof File) {
     formData.append("image", image, image.name);

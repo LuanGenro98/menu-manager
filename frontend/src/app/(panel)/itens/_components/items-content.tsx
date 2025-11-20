@@ -132,7 +132,7 @@ export default function ItemsContent() {
                     <Card className="overflow-hidden rounded-xl border py-0 pb-2" key={item.id}>
                       <CardHeader className="p-0">
                       <Image
-                        src={item.imageUrl ? item.imageUrl : imageDefault}
+                        src={item.imageUrl ? item.imageUrl + "?t=" + Date.now()  : imageDefault}
                         width={300}
                         height={300}
                         className="w-full h-60 object-cover"
