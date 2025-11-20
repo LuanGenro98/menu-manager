@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 /** Service layer responsible for business logic related to menu items. */
 @Service
@@ -27,6 +28,7 @@ public class ItemService {
   private final ItemRepository itemRepository;
   private final CategoryRepository categoryRepository;
   private final ItemMapper mapper;
+  private final ImageService imageService;
 
   /**
    * Retrieves a single item by its ID.
@@ -63,7 +65,6 @@ public class ItemService {
       log.info("Fetching all items.");
       items = itemRepository.findAll();
     }
-    log.info("Found {} items.", items.size());
     return items.stream().map(mapper::toItemResponse).toList();
   }
 
@@ -71,11 +72,12 @@ public class ItemService {
    * Creates a new item and associates it with an existing category.
    *
    * @param request The DTO containing the data for the new item.
+   * @param image
    * @return A {@link CreateItemResponse} with the ID and name of the newly created item.
    * @throws CategoryNotFoundException if the category specified in the request does not exist.
    */
   @Transactional
-  public CreateItemResponse createItem(CreateItemRequest request) {
+  public CreateItemResponse createItem(CreateItemRequest request, MultipartFile image) {
     log.info(
         "Attempting to create a new item with name: '{}' in category ID: {}",
         request.name(),
@@ -100,11 +102,18 @@ public class ItemService {
             .category(category)
             .build();
 
-    log.debug("Item entity to be saved: {}", item);
     var savedItem = itemRepository.save(item);
-    log.info("Item '{}' created successfully with ID: {}.", savedItem.getName(), savedItem.getId());
 
-    return new CreateItemResponse(savedItem.getId(), savedItem.getName());
+    if (image != null && !image.isEmpty()) {
+      String fileName = "item-" + savedItem.getId();
+
+      String imageUrl = imageService.saveImage(image, fileName);
+
+      savedItem.setImageUrl(imageUrl);
+      itemRepository.save(item);
+    }
+
+    return new CreateItemResponse(savedItem.getId(), savedItem.getName(), savedItem.getImageUrl());
   }
 
   /**
@@ -117,7 +126,7 @@ public class ItemService {
    * @throws CategoryNotFoundException if the new category specified in the request does not exist.
    */
   @Transactional
-  public ItemResponse updateItem(int id, UpdateItemRequest request) {
+  public ItemResponse updateItem(int id, UpdateItemRequest request, MultipartFile image) {
     log.info("Attempting to update item with ID: {}", id);
     Item itemToUpdate =
         itemRepository
@@ -144,6 +153,18 @@ public class ItemService {
     itemToUpdate.setDescription(request.description());
     itemToUpdate.setPrice(request.price());
     itemToUpdate.setCategory(category);
+
+    if (image != null && !image.isEmpty()) {
+      String fileName = "item-" + id;
+      String keyImage = "uploads/" + fileName;
+
+      imageService.deleteImage(keyImage);
+
+      String imageUrl = imageService.saveImage(image, fileName);
+
+      itemToUpdate.setImageUrl(imageUrl);
+      itemRepository.save(itemToUpdate);
+    }
 
     Item updatedItem = itemRepository.save(itemToUpdate);
     log.info("Item with ID {} updated successfully.", updatedItem.getId());

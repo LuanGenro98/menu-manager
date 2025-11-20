@@ -41,4 +41,8 @@ public record UpdateItemRequest(
             requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull
         @Positive
-        int categoryId) {}
+        int categoryId,
+    @Schema(
+            description = "URL of the item's image",
+            example = "https://s3.amazonaws.com/bucket/uploads/file.png")
+        String imageUrl) {}

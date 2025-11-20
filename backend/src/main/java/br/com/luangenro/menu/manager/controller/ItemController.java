@@ -4,6 +4,7 @@ import br.com.luangenro.menu.manager.domain.dto.CreateItemRequest;
 import br.com.luangenro.menu.manager.domain.dto.CreateItemResponse;
 import br.com.luangenro.menu.manager.domain.dto.ItemResponse;
 import br.com.luangenro.menu.manager.domain.dto.UpdateItemRequest;
+import br.com.luangenro.menu.manager.service.ImageService;
 import br.com.luangenro.menu.manager.service.ItemService;
 import java.net.URI;
 import java.util.List;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 /**
@@ -23,6 +25,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class ItemController implements ItemApi {
 
   private final ItemService itemService;
+  private final ImageService imageService;
 
   /** {@inheritDoc} */
   @Override
@@ -53,26 +56,26 @@ public class ItemController implements ItemApi {
    * Spring's {@code ServletUriComponentsBuilder}.
    */
   @Override
-  public ResponseEntity<CreateItemResponse> createItem(CreateItemRequest request) {
-    log.info("Received request to create new item with name: '{}'", request.name());
-    CreateItemResponse response = itemService.createItem(request);
+  public ResponseEntity<CreateItemResponse> createItemWithImage(
+      CreateItemRequest request, MultipartFile image) {
+
+    CreateItemResponse response = itemService.createItem(request, image);
+
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequest()
             .path("/{id}")
             .buildAndExpand(response.id())
             .toUri();
-    log.info(
-        "Item created with ID {}. Responding with 201 Created at location: {}",
-        response.id(),
-        location);
+
     return ResponseEntity.created(location).body(response);
   }
 
   /** {@inheritDoc} */
   @Override
-  public ResponseEntity<ItemResponse> updateItem(int id, UpdateItemRequest request) {
+  public ResponseEntity<ItemResponse> updateItem(
+      int id, UpdateItemRequest request, MultipartFile image) {
     log.info("Received request to update item with ID: {}", id);
-    ItemResponse updatedItem = itemService.updateItem(id, request);
+    ItemResponse updatedItem = itemService.updateItem(id, request, image);
     log.info("Item with ID {} updated successfully. Responding with 200 OK.", updatedItem.id());
     return ResponseEntity.ok(updatedItem);
   }
