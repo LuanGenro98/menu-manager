@@ -22,6 +22,7 @@ export function DialogItem({ closeModal, initialValues, onRefresh, itemId}: Dial
     const [categories, setCategories] = useState<Category[]>([]);
     const form = useDialogItemForm({ initialValues: initialValues });
     const [loading, setLoading] = useState(false);
+    const [preview, setPreview] = useState(initialValues?.imageUrl);
 
     useEffect(() => {
         async function loadCategories() {
@@ -41,20 +42,28 @@ export function DialogItem({ closeModal, initialValues, onRefresh, itemId}: Dial
     async function onSubmit(values: DialogItemFormData){
         setLoading(true);
 
-        const data = {
-            "name": values.name,
-            "price": convertRealToAmerican(values.price),
-            "description": values.description,
-            "categoryId": Number(values.category_id)
+        const requestPayload = {
+            name: values.name,
+            price: convertRealToAmerican(values.price),
+            description: values.description,
+            categoryId: Number(values.category_id),
+        };
+          
+        const formData = new FormData();
+          
+        formData.append(
+            "request",
+            new Blob([JSON.stringify(requestPayload)], { type: "application/json" })
+        );
+          
+        if (values.image) {
+            formData.append("image", values.image);
         }
 
         if(itemId){
             const result = await fetch(`/api/items/${itemId}`, {
                 method: "PUT",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data),
+                body: formData,
             });
 
             if(!result.ok){
@@ -71,10 +80,7 @@ export function DialogItem({ closeModal, initialValues, onRefresh, itemId}: Dial
 
         const result = await fetch("/api/items", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
+            body: formData,
         });
 
         setLoading(false);
@@ -156,6 +162,7 @@ export function DialogItem({ closeModal, initialValues, onRefresh, itemId}: Dial
                                 <FormMessage />
                             </FormItem>
                     )}/>
+
                     <FormField
                         control={form.control}
                         name="category_id"
@@ -185,7 +192,46 @@ export function DialogItem({ closeModal, initialValues, onRefresh, itemId}: Dial
                             <FormMessage />
                             </FormItem>
                         )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="image"
+                        render={({ field }) => (
+                            <FormItem className="my-2">
+                            <FormLabel className="font-semibold">Imagem do item</FormLabel>
+
+                            <FormControl>
+                                <div>
+                                <Input
+                                    type="file"
+                                    accept="image/png, image/jpeg, image/jpg"
+                                    onChange={(e) => {
+                                    const file = e.target.files?.[0] ?? null;
+                                    field.onChange(file);
+
+                                    if (file) {
+                                        setPreview(URL.createObjectURL(file));
+                                      }
+                                    }}
+                                />
+
+                                {preview && (
+                                    <img
+                                        src={preview}
+                                        alt="Preview"
+                                        className="mt-3 h-32 w-32 object-cover rounded-lg border"
+                                    />
+                                )}
+
+                                </div>
+                            </FormControl>
+
+                            <FormMessage />
+                            </FormItem>
+                        )}
                         />
+
 
                     <Button type="submit" className="w-full font-semibold text-white" disabled={loading}>
                         { loading ? "carregando..." : `${itemId ? "Alterar item" : "Adicionar novo item"}`}

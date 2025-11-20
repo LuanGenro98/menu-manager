@@ -23,23 +23,33 @@ export async function GET(req: Request) {
   
   return Response.json(data);
 }
+
 export async function POST(req: Request) {
   const cookieStore = cookies();
   const token = (await cookieStore).get("token")?.value;
 
-  const body = await req.json();
+  const incoming = await req.formData();
+  const formData = new FormData();
+
+  // pegar o request (que chega como Blob)
+  const request = incoming.get("request");
+  if (request) formData.append("request", request);
+
+  // pegar image
+  const image = incoming.get("image");
+  if (image instanceof File) {
+    formData.append("image", image, image.name);
+  }
 
   const response = await fetch(`${API_BASE_URL}api/v1/items`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
       Accept: "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    body: JSON.stringify(body),
+    body: formData,
   });
-  
+
   const data = await response.json();
-  
   return Response.json(data);
 }

@@ -28,6 +28,8 @@ import { Item } from "@/types/next-props";
 import { convertAmericanToReal } from "@/src/utils/convertCurrency";
 import SelectCategory from "./select-category";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
+import imageDefault from "@/public/menu-manager-background.jpg"
 
 export default function ItemsContent() {
   const searchParams = useSearchParams();
@@ -54,6 +56,7 @@ export default function ItemsContent() {
   }
 
   function handleEditItem(item: Item){
+     console.log("is seting: ", item)
       setEditingItem(item);
       setIsDialogOpen(true);
   }
@@ -67,6 +70,8 @@ export default function ItemsContent() {
       if (!res.ok) throw new Error("Failed to fetch items");
 
       const data = await res.json();
+
+      console.log(data);
 
       setItems(data);
     } catch (error) {
@@ -84,7 +89,14 @@ export default function ItemsContent() {
 
   return (
     <>
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={(open) => {
+        setIsDialogOpen(open)
+
+        if (!open) {
+          setEditingItem(null);
+        }
+      }
+        }>
         <section className="mx-auto">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -112,40 +124,59 @@ export default function ItemsContent() {
                                 description: editingItem.description,
                                 price: convertAmericanToReal(editingItem.price),
                                 category_id: String(editingItem.categoryId),
+                                imageUrl: editingItem.imageUrl
                             } : undefined} />
                         </DialogContent>
                 </CardHeader>
                 </Card>
 
-                { items.map(item => (
-                  <Card className="my-5" key={item.id}>
-                    <CardContent>
-                        <section className="space-y-2">
-                                <article className="flex items-center justify-between">
-                                    <div className="flex flex-col items-start gap-y-2 space-x-2">
-                                        <div className="flex items-center space-x-2">
-                                          <span className="font-semibold">{item.name}</span>
-                                          <span className="text-gray-500">-</span>
-                                          <span className="text-gray-400">{formatCurrency(item.price)}</span>
-                                        </div>
-                                        <div>
-                                          <span>{item.description}</span>
-                                        </div>
-                                    </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 my-5 gap-5">
+                  { items.map(item => (
+                    <Card className="overflow-hidden rounded-xl border py-0 pb-2" key={item.id}>
+                      <CardHeader className="p-0">
+                      <Image
+                        src={item.imageUrl ? item.imageUrl : imageDefault}
+                        width={300}
+                        height={300}
+                        className="w-full h-60 object-cover"
+                        alt={item.name}
+                        unoptimized={true}
+                        priority
+                      />
+                      </CardHeader>
 
-                                    <div>
-                                        <Button variant="ghost" size="icon" onClick={() => {handleEditItem(item)}}>
-                                            <Pencil className="w-4 h-4"/>
-                                        </Button>
-                                        <Button variant="ghost" size="icon" onClick={() => {handleDeleteItem(item.id)}}>
-                                            <X className="w-4 h-4"/>
-                                        </Button>
-                                    </div>
-                                </article>
-                        </section>
+                      <CardContent className="px-4 py-2 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-lg text-muted-foreground">Nome:</span>
+                          <span className="font-semibold">{item.name}</span>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <span className="text-lg text-muted-foreground">Preco:</span>
+                          <span className="font-semibold">{formatCurrency(item.price)}</span>
+                        </div>
+
+                        <div className="flex items-center">
+                          <span className="text-lg text-muted-foreground">{item.description}</span>
+                        </div>
+
+                          <div>
+                              <Button variant="outline" className="w-full text-md" onClick={() => {handleEditItem(item)}}>
+                                  <Pencil className="w-6 h-6"/>                        
+                                  Editar
+                              </Button>
+                              { !item.hasOrders && (
+                                <Button variant="default" className="w-full text-md mt-2" onClick={() => {handleDeleteItem(item.id)}}>
+                                  <X className="w-6 h-6"/>
+                                  Remover
+                                </Button>
+                              )}
+     
+                          </div>
                     </CardContent>
-              </Card>
-            ))}
+                    </Card>
+              ))}
+            </div>
         </section>
     </Dialog>
     </>
