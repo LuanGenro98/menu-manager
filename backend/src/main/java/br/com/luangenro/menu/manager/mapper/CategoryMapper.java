@@ -37,6 +37,7 @@ public class CategoryMapper {
                             .name(item.getName())
                             .description(item.getDescription())
                             .price(item.getPrice())
+                            .imageUrl(item.getImageUrl())
                             .build())
                 .toList())
         .build();

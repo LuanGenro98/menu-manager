@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 6-add-image-url-to-item
+      author: gregory.stein
+      changes:
+        - addColumn:
+            tableName: item
+            schemaName: public
+            columns:
+              - column:
+                  name: image_url
+                  type: varchar(300)
+                  constraints:
+                    nullable: true
+      rollback:
+        - dropColumn:
+            columnName: image_url
+            tableName: item

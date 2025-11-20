@@ -4,6 +4,8 @@ export interface Item {
     description: string,
     price: string;
     category_id: string;
+    imageUrl?: string;
+    hasOrders?: boolean;
 }
 
 export interface Category {

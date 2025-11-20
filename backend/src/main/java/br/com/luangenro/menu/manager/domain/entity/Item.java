@@ -34,6 +34,9 @@ public class Item {
   @Column(name = "price", nullable = false)
   private BigDecimal price;
 
+  @Column(name = "image_url", nullable = false)
+  private String imageUrl;
+
   @ManyToOne
   @JoinColumn(name = "category_id")
   private Category category;

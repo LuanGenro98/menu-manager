@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import z from 'zod'
 
 const formSchema = z.object({
-    tableNumber: z.string().min(1, { message: "Nome é um campo obrigatório." }),
+    tableNumber: z.coerce.number().min(1, { message: "Número é um campo obrigatório." }),
     itemsIds: z.array(z.number()).min(1, {
         message: "Selecione pelo menos um item.",
     }),
