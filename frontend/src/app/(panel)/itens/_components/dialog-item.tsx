@@ -22,7 +22,10 @@ export function DialogItem({ closeModal, initialValues, onRefresh, itemId}: Dial
     const [categories, setCategories] = useState<Category[]>([]);
     const form = useDialogItemForm({ initialValues: initialValues });
     const [loading, setLoading] = useState(false);
+<<<<<<< HEAD
     const [preview, setPreview] = useState(initialValues?.imageUrl);
+=======
+>>>>>>> 7e57ed6b904f64a89959525d9a234fa0ca3424dd
 
     useEffect(() => {
         async function loadCategories() {
@@ -42,6 +45,7 @@ export function DialogItem({ closeModal, initialValues, onRefresh, itemId}: Dial
     async function onSubmit(values: DialogItemFormData){
         setLoading(true);
 
+<<<<<<< HEAD
         const requestPayload = {
             name: values.name,
             price: convertRealToAmerican(values.price),
@@ -58,12 +62,26 @@ export function DialogItem({ closeModal, initialValues, onRefresh, itemId}: Dial
           
         if (values.image) {
             formData.append("image", values.image);
+=======
+        const data = {
+            "name": values.name,
+            "price": convertRealToAmerican(values.price),
+            "description": values.description,
+            "categoryId": Number(values.category_id)
+>>>>>>> 7e57ed6b904f64a89959525d9a234fa0ca3424dd
         }
 
         if(itemId){
             const result = await fetch(`/api/items/${itemId}`, {
                 method: "PUT",
+<<<<<<< HEAD
                 body: formData,
+=======
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+>>>>>>> 7e57ed6b904f64a89959525d9a234fa0ca3424dd
             });
 
             if(!result.ok){
@@ -80,7 +98,14 @@ export function DialogItem({ closeModal, initialValues, onRefresh, itemId}: Dial
 
         const result = await fetch("/api/items", {
             method: "POST",
+<<<<<<< HEAD
             body: formData,
+=======
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+>>>>>>> 7e57ed6b904f64a89959525d9a234fa0ca3424dd
         });
 
         setLoading(false);
@@ -162,7 +187,10 @@ export function DialogItem({ closeModal, initialValues, onRefresh, itemId}: Dial
                                 <FormMessage />
                             </FormItem>
                     )}/>
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7e57ed6b904f64a89959525d9a234fa0ca3424dd
                     <FormField
                         control={form.control}
                         name="category_id"
@@ -192,6 +220,7 @@ export function DialogItem({ closeModal, initialValues, onRefresh, itemId}: Dial
                             <FormMessage />
                             </FormItem>
                         )}
+<<<<<<< HEAD
                     />
 
                     <FormField
@@ -233,6 +262,10 @@ export function DialogItem({ closeModal, initialValues, onRefresh, itemId}: Dial
                         />
 
 
+=======
+                        />
+
+>>>>>>> 7e57ed6b904f64a89959525d9a234fa0ca3424dd
                     <Button type="submit" className="w-full font-semibold text-white" disabled={loading}>
                         { loading ? "carregando..." : `${itemId ? "Alterar item" : "Adicionar novo item"}`}
                     </Button>

@@ -22,6 +22,16 @@ import {
   } from "@/components/ui/command"
 import { cn } from "@/lib/utils";
 
+<<<<<<< HEAD
+=======
+interface DialogOrderProps {
+    closeModal: () => void;
+    onRefresh: () => void;
+    orderId?: string;
+    initialValues?: Order
+}
+
+>>>>>>> 7e57ed6b904f64a89959525d9a234fa0ca3424dd
 export function DialogOrder({ closeModal, initialValues, onRefresh, orderId}: any){
     const form = useDialogOrderForm({ initialValues: initialValues });
     const [loading, setLoading] = useState(false);

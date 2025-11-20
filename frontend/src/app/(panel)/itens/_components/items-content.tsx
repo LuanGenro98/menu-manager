@@ -56,7 +56,6 @@ export default function ItemsContent() {
   }
 
   function handleEditItem(item: Item){
-     console.log("is seting: ", item)
       setEditingItem(item);
       setIsDialogOpen(true);
   }
@@ -70,8 +69,6 @@ export default function ItemsContent() {
       if (!res.ok) throw new Error("Failed to fetch items");
 
       const data = await res.json();
-
-      console.log(data);
 
       setItems(data);
     } catch (error) {

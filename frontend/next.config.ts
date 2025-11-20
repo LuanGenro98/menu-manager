@@ -4,6 +4,7 @@ const nextConfig = {
   experimental: {
     appDir: true,
   },
+<<<<<<< HEAD
   images: {
     remotePatterns: [
       {
@@ -14,6 +15,8 @@ const nextConfig = {
       },
     ],
   },
+=======
+>>>>>>> 7e57ed6b904f64a89959525d9a234fa0ca3424dd
 }
 
 export default nextConfig

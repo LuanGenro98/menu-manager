@@ -81,6 +81,7 @@ export default function CategoryContent() {
 
   return (
     <>
+<<<<<<< HEAD
       <Dialog open={isDialogOpen} onOpenChange={(open) => {
         setIsDialogOpen(open)
 
@@ -88,6 +89,9 @@ export default function CategoryContent() {
           setEditingCategory(null);
         }
       }}>
+=======
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+>>>>>>> 7e57ed6b904f64a89959525d9a234fa0ca3424dd
         <section className="mx-auto">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

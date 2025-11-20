@@ -23,8 +23,11 @@ public class ItemMapper {
         .description(item.getDescription())
         .price(item.getPrice())
         .imageUrl(item.getImageUrl())
+<<<<<<< HEAD
             .categoryId(item.getCategory() != null ? item.getCategory().getId() : null)
               .hasOrders(hasOrders)
+=======
+>>>>>>> 7e57ed6b904f64a89959525d9a234fa0ca3424dd
         .build();
   }
 }
