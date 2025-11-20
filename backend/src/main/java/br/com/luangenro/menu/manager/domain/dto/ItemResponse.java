@@ -18,4 +18,8 @@ public record ItemResponse(
     @Schema(description = "Unique ID of the item.", example = "101") Integer id,
     @Schema(description = "Name of the item.", example = "Coca-Cola") String name,
     @Schema(description = "Description of the item.", example = "350ml can") String description,
-    @Schema(description = "Price of the item.", example = "5.50") BigDecimal price) {}
+    @Schema(description = "Price of the item.", example = "5.50") BigDecimal price,
+    @Schema(
+            description = "URL of the item's image",
+            example = "https://s3.amazonaws.com/bucket/uploads/file.png")
+        String imageUrl) {}

@@ -20,6 +20,7 @@ public class ItemMapper {
         .name(item.getName())
         .description(item.getDescription())
         .price(item.getPrice())
+        .imageUrl(item.getImageUrl())
         .build();
   }
 }
