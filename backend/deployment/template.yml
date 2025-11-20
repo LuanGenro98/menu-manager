@@ -1,14 +1,19 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-  Stack completa para a aplicação Menu Manager (EC2, Docker, Postgres)
+  Stack completa para a aplicacao Menu Manager com RDS PostgreSQL
   no ambiente AWS Academy Sandbox.
 
+Parameters:
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: IDs das subnets (em AZs diferentes) para o RDS
+
 Resources:
-  # 1. O Firewall (Security Group)
-  MenuManagerSecurityGroup:
+  # 1. Security Group para a aplicação EC2
+  MenuManagerBackendSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Libera portas 22 (SSH), 8080 (App) e 5432 (Banco)
+      GroupDescription: Libera portas 22 (SSH) e 8080 (App)
       SecurityGroupIngress:
         # Regra do SSH (Porta 22)
         - IpProtocol: tcp
@@ -20,50 +25,123 @@ Resources:
           FromPort: 8080
           ToPort: 8080
           CidrIp: 0.0.0.0/0
-        # Regra do Postgres (Porta 5432)
+
+  # 2. Security Group para o RDS
+  MenuManagerDatabaseSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Libera porta 5432 (PostgreSQL) apenas para a aplicacao
+      SecurityGroupIngress:
+        # Regra do Postgres (Porta 5432) - apenas do Security Group da aplicação
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !GetAtt MenuManagerBackendSecurityGroup.GroupId
+        # Regra do Postgres (Porta 5432) - para testes externos
         - IpProtocol: tcp
           FromPort: 5432
           ToPort: 5432
           CidrIp: 0.0.0.0/0
 
-  # 2. O Servidor (EC2 Instance)
+  # 3. Subnet Group para o RDS (necessário para criar o RDS)
+  MenuManagerDatabaseSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group para o RDS PostgreSQL
+      SubnetIds: !Ref SubnetIds
+
+  # 4. Instância RDS PostgreSQL
+  MenuManagerDatabase:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: menu-manager-database
+      DBInstanceClass: db.t3.micro
+      Engine: postgres
+      EngineVersion: '17.6'
+      MasterUsername: dbuser
+      MasterUserPassword: EAC2d3QhDRZs2vue
+      AllocatedStorage: 20
+      StorageType: gp2
+      StorageEncrypted: true
+      VPCSecurityGroups:
+        - !GetAtt MenuManagerDatabaseSecurityGroup.GroupId
+      DBSubnetGroupName: !Ref MenuManagerDatabaseSubnetGroup
+      PubliclyAccessible: true
+      BackupRetentionPeriod: 7
+      DBName: menu_manager
+
+  # 5. O Servidor EC2 (apenas aplicação)
   MenuManagerInstance:
     Type: AWS::EC2::Instance
+    DependsOn: MenuManagerDatabase
     Properties:
       InstanceType: t3.micro
-      # Pega a AMI mais recente do Amazon Linux 2023 (evita que a AMI expire)
       ImageId: ami-0cae6d6fe6048ca2c
-      KeyName: vockey # A chave padrão do AWS Academy Sandbox
-      IamInstanceProfile: LabInstanceProfile # O perfil IAM padrão do Sandbox
+      KeyName: vockey
+      IamInstanceProfile: LabInstanceProfile
       SecurityGroupIds:
-        - !Ref MenuManagerSecurityGroup
+        - !Ref MenuManagerBackendSecurityGroup
 
-      # 3. O "HD" (Volume EBS) + 4. Criptografia (KMS)
+      # Volume EBS com criptografia
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
-            VolumeSize: 30 # Limite do Sandbox é 35GB
+            VolumeSize: 30
             VolumeType: gp2
-            Encrypted: true # AQUI USAMOS O KMS! Mesmo se o botão não aparece.
+            Encrypted: true
 
-      # 5. O Script de Auto-Deploy (EC2 User Data)
+      # Script de Auto-Deploy
       UserData:
-        Fn::Base64: |
+        Fn::Base64: !Sub |
           #!/bin/bash
           # Atualiza os pacotes
           yum update -y
-          
+
           # Instala as ferramentas
           yum install -y git docker
           systemctl start docker
           usermod -aG docker ec2-user
-          
-          # Instala o Docker Compose V1 (com hífen)
+
+          # Instala o Docker Compose V1
           curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
           chmod +x /usr/local/bin/docker-compose
-          
-          # Loga como o usuário 'ec2-user' para fazer o deploy
-          su - ec2-user -c "git clone https://github.com/LuanGenro98/menu-manager.git /home/ec2-user/menu-manager"
-          
-          # Sobe a aplicação
-          su - ec2-user -c "cd /home/ec2-user/menu-manager/backend && DOCKER_BUILDKIT=0 docker-compose up --build -d"
+
+          # Clona o repositório
+          su - ec2-user -c "git clone --branch main --single-branch https://github.com/LuanGenro98/menu-manager.git /home/ec2-user/menu-manager"
+
+          # Configura as variáveis de ambiente para conectar ao RDS
+          cat > /home/ec2-user/menu-manager/backend/.env << EOF
+          SPRING_DATASOURCE_URL=jdbc:postgresql://${MenuManagerDatabase.Endpoint.Address}:5432/menu_manager
+          SPRING_DATASOURCE_USERNAME=dbuser
+          SPRING_DATASOURCE_PASSWORD=EAC2d3QhDRZs2vue
+          EOF
+
+          chown ec2-user:ec2-user /home/ec2-user/menu-manager/backend/.env
+
+          # Sobe apenas a aplicação (sem o banco)
+          su - ec2-user -c "cd /home/ec2-user/menu-manager/backend && DOCKER_BUILDKIT=0 docker-compose -f ./docker-compose.aws.yml up --build -d app"
+
+Outputs:
+  ApplicationURL:
+    Description: URL da aplicacao, pode demorar ate 5 minutos para ficar disponivel
+    Value: !Sub 'http://${MenuManagerInstance.PublicDnsName}:8080/swagger-ui/index.html#/'
+
+  DatabaseEndpoint:
+    Description: Endpoint do banco de dados RDS
+    Value: !GetAtt MenuManagerDatabase.Endpoint.Address
+
+  DatabasePort:
+    Description: Porta do banco de dados
+    Value: !GetAtt MenuManagerDatabase.Endpoint.Port
+
+  DatabaseName:
+    Description: Nome do banco de dados
+    Value: menu_manager
+
+  DatabaseUsername:
+    Description: Nome do usuario master do banco de dados
+    Value: dbuser
+
+  DatabasePassword:
+    Description: Senha do usuario master do banco de dados
+    Value: EAC2d3QhDRZs2vue
