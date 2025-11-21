@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
 public record UpdateDemandStatusRequest(
     @Schema(
             description = "The new status for the demand.",
-            example = "EM_PREPARO",
+            example = "PREPARING",
             requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull
         DemandStatus newStatus) {}

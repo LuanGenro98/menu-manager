@@ -37,7 +37,7 @@ public record UpdateItemRequest(
         BigDecimal price,
     @Schema(
             description = "The new category ID this item belongs to.",
-            example = "3",
+            example = "1",
             requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull
         @Positive

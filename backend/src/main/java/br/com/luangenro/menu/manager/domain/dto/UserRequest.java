@@ -14,16 +14,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record UserRequest(
     @Schema(
             description = "The desired username for the new account.",
-            example = "newuser",
+            example = "luan",
             requiredMode = Schema.RequiredMode.REQUIRED)
         String username,
     @Schema(
             description = "The plain text password for the new account.",
-            example = "strongPassword!@#",
+            example = "123",
             requiredMode = Schema.RequiredMode.REQUIRED)
         String password,
     @Schema(
             description = "The role to be assigned to the new user.",
-            example = "USER",
+            example = "ADMIN",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         Role role) {}

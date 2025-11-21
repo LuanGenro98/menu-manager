@@ -5,5 +5,7 @@
     <include file="3-create-demand-table-20240430.yaml" relativeToChangelogFile="true" />
     <include file="4-create-demand-item-table-20240430.yaml" relativeToChangelogFile="true" />
     <include file="5-create-users-table-20250928.yaml" relativeToChangelogFile="true" />
+    <include file="6-create-user-id-column-on-demand-table.yaml" relativeToChangelogFile="true" />
+    <include file="7-delete-item-amount-column-from-demand-item-table.yaml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>

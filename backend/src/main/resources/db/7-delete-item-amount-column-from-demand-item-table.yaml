@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 7-drop-item-amount-from-demand-item
+      author: luan.genro
+      changes:
+        - dropColumn:
+            tableName: demand_item
+            columnName: item_amount
+      rollback:
+        - addColumn:
+            tableName: demand_item
+            columns:
+              - column:
+                  name: item_amount
+                  type: int
+                  defaultValue: 1
+                  constraints:
+                    nullable: false
