@@ -1,15 +1,35 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-  Stack completa para a aplicacao Menu Manager com RDS PostgreSQL
+  Stack completa para a aplicacao Menu Manager com RDS PostgreSQL e ElastiCache Redis
   no ambiente AWS Academy Sandbox.
 
 Parameters:
   SubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
-    Description: IDs das subnets (em AZs diferentes) para o RDS
+    Description: IDs das subnets (em AZs diferentes) para o RDS e ElastiCache
+
+  DBUsername:
+    Type: String
+    Description: Nome do usuario master do banco de dados PostgreSQL
+    Default: dbuser
+    MinLength: 1
+    MaxLength: 16
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: Deve comecar com uma letra e conter apenas caracteres alfanumericos
+
+  DBPassword:
+    Type: String
+    Description: Senha do usuario master do banco de dados PostgreSQL
+    NoEcho: true
+    MinLength: 8
+    MaxLength: 41
+    AllowedPattern: '[a-zA-Z0-9]*'
+    ConstraintDescription: Deve conter apenas caracteres alfanumericos e ter entre 8 e 41 caracteres
 
 Resources:
-  # 1. Security Group para a aplicação EC2
+  # Secao 1:  Security Groups necessarios para a Aplicacao, RDS e ElastiCache
+
+  # 1.1 Security Group para a aplicação EC2
   MenuManagerBackendSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -26,7 +46,7 @@ Resources:
           ToPort: 8080
           CidrIp: 0.0.0.0/0
 
-  # 2. Security Group para o RDS
+  # 1.2 Security Group para o RDS
   MenuManagerDatabaseSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -43,14 +63,37 @@ Resources:
           ToPort: 5432
           CidrIp: 0.0.0.0/0
 
-  # 3. Subnet Group para o RDS (necessário para criar o RDS)
+  # 1.3 Security Group para o ElastiCache Redis
+  MenuManagerRedisSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Libera porta 6379 (Redis) apenas para a aplicacao
+      SecurityGroupIngress:
+        # Regra do Redis (Porta 6379) - apenas do Security Group da aplicação
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          SourceSecurityGroupId: !GetAtt MenuManagerBackendSecurityGroup.GroupId
+
+  # Secao 2: Subnet Groups das instancias do RDS e ElastiCache
+
+  # 2.1 Subnet Group para o RDS (necessário para criar o RDS)
   MenuManagerDatabaseSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
       DBSubnetGroupDescription: Subnet group para o RDS PostgreSQL
       SubnetIds: !Ref SubnetIds
 
-  # 4. Instância RDS PostgreSQL
+  # 2.2 Subnet Group para o ElastiCache
+  MenuManagerRedisSubnetGroup:
+    Type: AWS::ElastiCache::SubnetGroup
+    Properties:
+      Description: Subnet group para o ElastiCache Redis
+      SubnetIds: !Ref SubnetIds
+
+  # Secao 3: Configuração das instâncias do RDS, ElastiCache e EC2 Backend
+
+  # 3.1 Instância RDS PostgreSQL
   MenuManagerDatabase:
     Type: AWS::RDS::DBInstance
     Properties:
@@ -58,8 +101,8 @@ Resources:
       DBInstanceClass: db.t3.micro
       Engine: postgres
       EngineVersion: '17.6'
-      MasterUsername: dbuser
-      MasterUserPassword: EAC2d3QhDRZs2vue
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
       AllocatedStorage: 20
       StorageType: gp2
       StorageEncrypted: true
@@ -70,10 +113,24 @@ Resources:
       BackupRetentionPeriod: 7
       DBName: menu_manager
 
-  # 5. O Servidor EC2 (apenas aplicação)
+  # 3.2 Instância ElastiCache Redis
+  MenuManagerRedisCluster:
+    Type: AWS::ElastiCache::CacheCluster
+    Properties:
+      Engine: redis
+      CacheNodeType: cache.t3.micro
+      NumCacheNodes: 1
+      Port: 6379
+      VpcSecurityGroupIds:
+        - !GetAtt MenuManagerRedisSecurityGroup.GroupId
+      CacheSubnetGroupName: !Ref MenuManagerRedisSubnetGroup
+
+  # 3.3 O Servidor EC2 (apenas aplicação backend)
   MenuManagerInstance:
     Type: AWS::EC2::Instance
-    DependsOn: MenuManagerDatabase
+    DependsOn:
+      - MenuManagerDatabase
+      - MenuManagerRedisCluster
     Properties:
       InstanceType: t3.micro
       ImageId: ami-0cae6d6fe6048ca2c
@@ -109,11 +166,18 @@ Resources:
           # Clona o repositório
           su - ec2-user -c "git clone --branch main --single-branch https://github.com/LuanGenro98/menu-manager.git /home/ec2-user/menu-manager"
 
-          # Configura as variáveis de ambiente para conectar ao RDS
+          # Configura as variáveis de ambiente para conectar ao RDS e ElastiCache
           cat > /home/ec2-user/menu-manager/backend/.env << EOF
+          # Database Configuration
+          
           SPRING_DATASOURCE_URL=jdbc:postgresql://${MenuManagerDatabase.Endpoint.Address}:5432/menu_manager
-          SPRING_DATASOURCE_USERNAME=dbuser
-          SPRING_DATASOURCE_PASSWORD=EAC2d3QhDRZs2vue
+          SPRING_DATASOURCE_USERNAME=${DBUsername}
+          SPRING_DATASOURCE_PASSWORD=${DBPassword}
+          
+          # Redis Configuration
+          SPRING_DATA_REDIS_HOST=${MenuManagerRedisCluster.RedisEndpoint.Address}
+          SPRING_DATA_REDIS_PORT=6379
+          SPRING_CACHE_TYPE=redis
           EOF
 
           chown ec2-user:ec2-user /home/ec2-user/menu-manager/backend/.env
@@ -140,8 +204,16 @@ Outputs:
 
   DatabaseUsername:
     Description: Nome do usuario master do banco de dados
-    Value: dbuser
+    Value: !Ref DBUsername
 
   DatabasePassword:
     Description: Senha do usuario master do banco de dados
-    Value: EAC2d3QhDRZs2vue
+    Value: !Ref DBPassword
+
+  RedisEndpoint:
+    Description: Endpoint do ElastiCache Redis
+    Value: !GetAtt MenuManagerRedisCluster.RedisEndpoint.Address
+
+  RedisPort:
+    Description: Porta do Redis
+    Value: 6379

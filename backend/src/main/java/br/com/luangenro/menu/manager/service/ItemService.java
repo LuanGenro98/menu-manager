@@ -11,12 +11,19 @@ import br.com.luangenro.menu.manager.exception.ItemNotFoundException;
 import br.com.luangenro.menu.manager.mapper.ItemMapper;
 import br.com.luangenro.menu.manager.repository.CategoryRepository;
 import br.com.luangenro.menu.manager.repository.ItemRepository;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+
+import static br.com.luangenro.menu.manager.domain.CacheName.*;
 
 /** Service layer responsible for business logic related to menu items. */
 @Service
@@ -26,6 +33,7 @@ public class ItemService {
 
   private final ItemRepository itemRepository;
   private final CategoryRepository categoryRepository;
+  private final CacheManager cacheManager;
   private final ItemMapper mapper;
 
   /**
@@ -36,6 +44,7 @@ public class ItemService {
    * @throws ItemNotFoundException if no item with the given ID is found.
    */
   @Transactional(readOnly = true)
+  @Cacheable(value = GET_ITEM_BY_ID, key = "#id")
   public ItemResponse getItem(int id) {
     log.info("Fetching item with ID: {}", id);
     Item item =
@@ -54,6 +63,7 @@ public class ItemService {
    * @return A list of {@link ItemResponse}. Returns an empty list if no items are found.
    */
   @Transactional(readOnly = true)
+  @Cacheable(value = GET_ITEM_BY_CATEGORY, key = "#categoryId != null ? #categoryId : 'allItems'")
   public List<ItemResponse> getItems(Integer categoryId) {
     List<Item> items;
     if (categoryId != null) {
@@ -75,6 +85,12 @@ public class ItemService {
    * @throws CategoryNotFoundException if the category specified in the request does not exist.
    */
   @Transactional
+  @Caching(evict = {
+          @CacheEvict(value = GET_ITEM_BY_CATEGORY, key = "'allItems'"),
+          @CacheEvict(value = GET_ITEM_BY_CATEGORY, key = "#request.categoryId()"),
+          @CacheEvict(value = GET_ALL_CATEGORIES, key = "'allCategories'"),
+          @CacheEvict(value = GET_CATEGORY_BY_ID, key = "#request.categoryId()"),
+  })
   public CreateItemResponse createItem(CreateItemRequest request) {
     log.info(
         "Attempting to create a new item with name: '{}' in category ID: {}",
@@ -117,6 +133,13 @@ public class ItemService {
    * @throws CategoryNotFoundException if the new category specified in the request does not exist.
    */
   @Transactional
+  @Caching(evict = {
+            @CacheEvict(value = GET_ITEM_BY_ID, key = "#id"),
+            @CacheEvict(value = GET_ITEM_BY_CATEGORY, key = "'allItems'"),
+            @CacheEvict(value = GET_ITEM_BY_CATEGORY, key = "#request.categoryId()"),
+            @CacheEvict(value = GET_ALL_CATEGORIES, key = "'allCategories'"),
+            @CacheEvict(value = GET_CATEGORY_BY_ID, key = "#request.categoryId()"),
+  })
   public ItemResponse updateItem(int id, UpdateItemRequest request) {
     log.info("Attempting to update item with ID: {}", id);
     Item itemToUpdate =
@@ -158,6 +181,12 @@ public class ItemService {
    * @throws ItemNotFoundException if the item with the given ID does not exist.
    */
   @Transactional
+  @Caching(evict = {
+            @CacheEvict(value = GET_ITEM_BY_ID, key = "#id"),
+            @CacheEvict(value = GET_ITEM_BY_CATEGORY, allEntries = true),
+            @CacheEvict(value = GET_ALL_CATEGORIES, key = "'allCategories'"),
+            @CacheEvict(value = GET_CATEGORY_BY_ID, allEntries = true),
+  })
   public void deleteItem(int id) {
     log.info("Attempting to delete item with ID: {}", id);
     if (!itemRepository.existsById(id)) {

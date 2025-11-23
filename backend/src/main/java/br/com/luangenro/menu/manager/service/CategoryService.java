@@ -1,16 +1,26 @@
 package br.com.luangenro.menu.manager.service;
 
-import br.com.luangenro.menu.manager.domain.dto.*;
+import br.com.luangenro.menu.manager.domain.dto.CategoryResponse;
+import br.com.luangenro.menu.manager.domain.dto.CreateCategoryRequest;
+import br.com.luangenro.menu.manager.domain.dto.CreateCategoryResponse;
+import br.com.luangenro.menu.manager.domain.dto.UpdateCategoryRequest;
 import br.com.luangenro.menu.manager.domain.entity.Category;
 import br.com.luangenro.menu.manager.exception.CategoryNotFoundException;
 import br.com.luangenro.menu.manager.mapper.CategoryMapper;
 import br.com.luangenro.menu.manager.repository.CategoryRepository;
 import jakarta.transaction.Transactional;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
+
+import static br.com.luangenro.menu.manager.domain.CacheName.GET_ALL_CATEGORIES;
+import static br.com.luangenro.menu.manager.domain.CacheName.GET_CATEGORY_BY_ID;
 
 /** Service layer responsible for business logic related to categories. */
 @Service
@@ -28,6 +38,7 @@ public class CategoryService {
    * @return A {@link CategoryResponse} containing the category details.
    * @throws CategoryNotFoundException if no category with the given ID is found.
    */
+  @Cacheable(value = GET_CATEGORY_BY_ID, key = "#id")
   public CategoryResponse getCategory(int id) {
     log.info("Fetching category with ID: {}", id);
     Category category =
@@ -45,6 +56,7 @@ public class CategoryService {
    *
    * @return A list of {@link CategoryResponse}. Returns an empty list if no categories are found.
    */
+  @Cacheable(value = GET_ALL_CATEGORIES, key = "'allCategories'")
   public List<CategoryResponse> getCategories() {
     log.info("Fetching all categories.");
     List<Category> categories = repository.findAll();
@@ -59,6 +71,7 @@ public class CategoryService {
    * @return A {@link CreateCategoryResponse} with the ID and name of the newly created category.
    */
   @Transactional
+  @CacheEvict(value = GET_ALL_CATEGORIES, key = "'allCategories'")
   public CreateCategoryResponse createCategory(CreateCategoryRequest request) {
     log.info("Attempting to create a new category with name: {}", request.name());
     var category =
@@ -89,6 +102,10 @@ public class CategoryService {
    * @throws CategoryNotFoundException if the category with the given ID does not exist.
    */
   @Transactional
+  @Caching(evict = {
+          @CacheEvict(value = GET_CATEGORY_BY_ID, key = "#id"),
+          @CacheEvict(value = GET_ALL_CATEGORIES, key = "'allCategories'")
+  })
   public CategoryResponse updateCategory(int id, UpdateCategoryRequest request) {
     log.info("Attempting to update category with ID: {}", id);
     Category categoryToUpdate =
@@ -117,6 +134,10 @@ public class CategoryService {
    * @throws CategoryNotFoundException if the category with the given ID does not exist.
    */
   @Transactional
+  @Caching(evict = {
+          @CacheEvict(value = GET_CATEGORY_BY_ID, key = "#id"),
+          @CacheEvict(value = GET_ALL_CATEGORIES, key = "'allCategories'")
+  })
   public void deleteCategory(int id) {
     log.info("Attempting to delete category with ID: {}", id);
     if (!repository.existsById(id)) {
