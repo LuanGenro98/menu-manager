@@ -33,8 +33,9 @@ Este método substitui a criação manual da instância EC2. Em vez de 10 clique
 8.  Em **"Parâmetros"** no parâmetro **"SubnetIds"** selecione valores que estejam em Availability Zones (AZs) diferentes
 
     - Exemplo: subnet-02c2d931d88c4f11a (us-east-1a) e subnet-0763e98daa8378dd3 (us-east-1b)
-
-9.  Clique em **"Next"** e, na página seguinte, em **"Submit"** (ou "Create stack").
+9.  Também preencha o parâmetros **"DBPassword"** com uma senha segura para o banco de dados PostgreSQL. **Anote essa senha!**
+10. Opcionalmente, você também pode preecher o parâmetro **"DBUsername"** com o valor desejado (o padrão é `dbuser`).
+11. Clique em **"Next"** e, na página seguinte, em **"Submit"** (ou "Create stack").
 
 ---
 
