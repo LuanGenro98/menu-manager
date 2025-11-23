@@ -18,7 +18,7 @@ export interface Category {
 export interface Order {
     id?: number;
     itemsIds: number[];
-    tableNumber: string;
+    tableNumber?: string;
     items: Item[];
     status: string;
     price: number;

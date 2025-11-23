@@ -145,7 +145,7 @@ export function DialogOrder({ closeModal, initialValues, onRefresh, orderId}: an
                                                 key={item.id}
                                                 onSelect={() => {
                                                     const updated = isSelected
-                                                    ? field.value.filter((v) => v !== item.id)
+                                                    ? field.value.filter((v: any) => v !== item.id)
                                                     : [...field.value, item.id];
 
                                                     field.onChange(updated);
