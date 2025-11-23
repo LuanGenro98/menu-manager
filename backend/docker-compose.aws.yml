@@ -3,7 +3,7 @@ version: '3.8'
 services:
   app:
     build: . # Constrói a imagem a partir do Dockerfile na raiz do projeto
-    container_name: menu-manager-app
+    container_name: menu-manager-backend
     ports:
       - '8080:8080'
     env_file:
