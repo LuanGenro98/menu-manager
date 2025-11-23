@@ -25,7 +25,4 @@ public class DemandItem {
   @ManyToOne
   @JoinColumn(name = "item_id")
   private Item item;
-
-  @Column(name = "item_amount")
-  private int itemAmount;
 }

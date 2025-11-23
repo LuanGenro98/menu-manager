@@ -12,11 +12,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record AuthRequest(
     @Schema(
             description = "The user's username.",
-            example = "admin",
+            example = "luan",
             requiredMode = Schema.RequiredMode.REQUIRED)
         String username,
     @Schema(
             description = "The user's plain text password.",
-            example = "password123",
+            example = "123",
             requiredMode = Schema.RequiredMode.REQUIRED)
         String password) {}

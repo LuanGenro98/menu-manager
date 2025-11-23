@@ -93,7 +93,8 @@ public interface DemandApi {
    */
   @Operation(
       summary = "Update a demand's status",
-      description = "Protected endpoint for staff to update the order status.")
+      description =
+          "Protected endpoint for staff to update the order status. Can be applied the following status: ORDERED, PREPARING, READY, SERVED, PAID or CANCELED.")
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "Status updated successfully"),
     @ApiResponse(responseCode = "404", description = "Demand not found", content = @Content)

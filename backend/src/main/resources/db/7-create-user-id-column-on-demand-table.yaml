@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: 6-add-user-to-demand
+      author: luan.genro
+      changes:
+        - addColumn:
+            tableName: demand
+            columns:
+              - column:
+                  name: user_id
+                  type: int
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_demand_user
+                    references: users(id)

@@ -15,14 +15,14 @@ import jakarta.validation.constraints.Size;
 public record CreateCategoryRequest(
     @Schema(
             description = "The name of the category.",
-            example = "Beverages",
+            example = "Hamburgers",
             requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank
         @Size(max = 50)
         String name,
     @Schema(
             description = "A short description of what the category includes.",
-            example = "Soft drinks, juices, and teas.",
+            example = "Hamburgers with various toppings and sides.",
             requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank
         @Size(max = 100)

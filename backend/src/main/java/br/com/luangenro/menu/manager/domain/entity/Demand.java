@@ -50,4 +50,9 @@ public class Demand {
       fetch = FetchType.LAZY)
   @Builder.Default
   private List<DemandItem> demandItems = new ArrayList<>();
+
+  /** O usuário que realizou este pedido. */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
 }

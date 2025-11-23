@@ -1,18 +1,26 @@
-version: "3.9"
+version: '3.9'
 
 services:
   # Serviço do Banco de Dados PostgreSQL
   database:
-    image: postgres:16-alpine      # 📌 VERSÃO FIXA: Para builds consistentes, evite a tag 'latest'.
+    image: postgres:16-alpine # 📌 VERSÃO FIXA: Para builds consistentes, evite a tag 'latest'.
     container_name: menu-manager-database
     environment:
-      - POSTGRES_DB=menu_manager   # ✨ SIMPLIFICADO: Cria o banco 'menu_manager' automaticamente.
+      - POSTGRES_DB=menu_manager # ✨ SIMPLIFICADO: Cria o banco 'menu_manager' automaticamente.
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - menu_manager_data:/var/lib/postgresql/data # Volume para persistir os dados
+
+  cache:
+    image: redis:7-alpine
+    container_name: menu-manager-cache
+    ports:
+      - '6379:6379'
+    volumes:
+      - menu_manager_cache:/data # Volume para persistir dados de cache
 
     # 🚀 BÔNUS: Serviço da sua Aplicação Spring Boot
     # Descomente e ajuste se quiser rodar sua app via Docker Compose também.
@@ -21,25 +29,32 @@ services:
     container_name: menu-manager-backend
     depends_on:
       - database # Garante que o banco inicie antes
+      - cache # Garante que o cache inicie antes
     ports:
-      - "8080:8080"
+      - '8080:8080'
     environment:
       # A app dentro do Docker se conecta ao 'database' pelo nome do serviço
       - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/menu_manager
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=admin
-  
+
+      # Configuração do Redis
+      - SPRING_DATA_REDIS_HOST=cache
+      - SPRING_DATA_REDIS_PORT=6379
+
   frontend:
     build: ./frontend/
-    container_name: menu-manager-front
+    container_name: menu-manager-frontend
     depends_on:
       - database
-      - backend 
+      - cache
+      - backend
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       NODE_ENV: production
 
 # Define o volume nomeado para persistência
 volumes:
   menu_manager_data:
+  menu_manager_cache:

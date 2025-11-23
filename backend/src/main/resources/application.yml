@@ -1,3 +1,13 @@
+cache:
+  ttl:
+    get:
+      item:
+        by-id: ${CACHE_TTL_GET_ITEM_BY_ID:300} # 5 minutos em segundos
+        by-category: ${CACHE_TTL_ITEM_BY_CATEGORY:300} # 5 minutos em segundos
+      category:
+        all:  ${CACHE_TTL_GET_ALL_CATEGORIES:300} # 5 minutos em segundos
+        by-id: ${CACHE_TTL_GET_CATEGORY_BY_ID:300} # 5 minutos em segundos
+
 spring:
   profiles:
     active: "" # Para ativar a segurança, deixe em branco ou remova a linha

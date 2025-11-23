@@ -37,7 +37,7 @@ public record CreateItemRequest(
         BigDecimal price,
     @Schema(
             description = "The ID of the category this item belongs to.",
-            example = "3",
+            example = "1",
             requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull
         @Positive

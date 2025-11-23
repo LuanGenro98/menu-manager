@@ -7,6 +7,7 @@ import br.com.luangenro.menu.manager.domain.dto.UpdateDemandStatusRequest;
 import br.com.luangenro.menu.manager.domain.entity.Demand;
 import br.com.luangenro.menu.manager.domain.entity.DemandItem;
 import br.com.luangenro.menu.manager.domain.entity.Item;
+import br.com.luangenro.menu.manager.domain.entity.User;
 import br.com.luangenro.menu.manager.domain.enumeration.DemandStatus;
 import br.com.luangenro.menu.manager.exception.DemandNotFoundException;
 import br.com.luangenro.menu.manager.exception.ItemNotFoundException;
@@ -34,6 +35,7 @@ public class DemandService {
   private final ItemRepository itemRepository;
   private final DemandMapper mapper;
   private final DemandItemRepository demandItemRepository;
+  private final UserService userService;
 
   /**
    * Creates a new customer demand based on the provided request data.
@@ -66,8 +68,11 @@ public class DemandService {
    */
   @Transactional
   public CreateDemandResponse createDemand(CreateDemandRequest demandRequest) {
+    User currentUser = userService.getCurrentUser();
+
     log.info(
-        "Attempting to create a new demand for table {} with {} items.",
+        "Attempting to create a new demand for user {} on table {} with {} items.",
+        currentUser.getUsername(),
         demandRequest.tableNumber(),
         demandRequest.itemsIds().size());
     log.debug("Received item IDs for new demand: {}", demandRequest.itemsIds());
@@ -96,6 +101,7 @@ public class DemandService {
             .status(DemandStatus.ORDERED)
             .tableNumber(demandRequest.tableNumber())
             .price(totalPrice)
+            .user(currentUser)
             .build();
 
     log.debug("Demand entity to be saved: {}", demand);
