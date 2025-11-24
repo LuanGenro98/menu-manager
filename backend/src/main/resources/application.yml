@@ -34,5 +34,3 @@ aws:
   region: ${AWS_REGION}
   s3:
     bucket: ${AWS_BUCKET}
-  accessKey: ${AWS_ACCESS:access}
-  secretKey:  ${AWS_SECRET:secret}

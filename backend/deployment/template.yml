@@ -26,6 +26,15 @@ Parameters:
     AllowedPattern: '[a-zA-Z0-9]*'
     ConstraintDescription: Deve conter apenas caracteres alfanumericos e ter entre 8 e 41 caracteres
 
+  CloneBranch:
+    Type: String
+    Description: 'Branch do repositório GitHub para clonar (ex: main ou dev)'
+    Default: 'main'
+
+  BucketUploadsFolder:
+    Type: String
+    Default: 'uploads'
+
 Resources:
   # Secao 1:  Security Groups necessarios para a Aplicacao, RDS e ElastiCache
 
@@ -125,10 +134,58 @@ Resources:
         - !GetAtt MenuManagerRedisSecurityGroup.GroupId
       CacheSubnetGroupName: !Ref MenuManagerRedisSubnetGroup
 
+  # 3.3 Bucket S3 para armazenar imagens
+  MenuManagerImagesBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'menu-manager-images-${AWS::AccountId}'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      CorsConfiguration:
+        CorsRules:
+          - AllowedOrigins:
+              - '*'
+            AllowedMethods:
+              - GET
+              - PUT
+              - POST
+              - DELETE
+              - HEAD
+            AllowedHeaders:
+              - '*'
+            MaxAge: 3000
+
+  MenuManagerBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref MenuManagerImagesBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowPublicRead
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Sub 'arn:aws:s3:::menu-manager-images-${AWS::AccountId}/${BucketUploadsFolder}/*'
+
+          - Sid: AllowUserUploads
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action:
+              - 's3:PutObject'
+              - 's3:GetObject'
+            Resource: !Sub 'arn:aws:s3:::menu-manager-images-${AWS::AccountId}/${BucketUploadsFolder}/*'
+
   # 3.3 O Servidor EC2 (apenas aplicação backend)
   MenuManagerInstance:
     Type: AWS::EC2::Instance
     DependsOn:
+      - MenuManagerImagesBucket
+      - MenuManagerBucketPolicy
       - MenuManagerDatabase
       - MenuManagerRedisCluster
     Properties:
@@ -164,20 +221,24 @@ Resources:
           chmod +x /usr/local/bin/docker-compose
 
           # Clona o repositório
-          su - ec2-user -c "git clone --branch main --single-branch https://github.com/LuanGenro98/menu-manager.git /home/ec2-user/menu-manager"
+          su - ec2-user -c "git clone --branch ${CloneBranch} --single-branch https://github.com/LuanGenro98/menu-manager.git /home/ec2-user/menu-manager"
 
           # Configura as variáveis de ambiente para conectar ao RDS e ElastiCache
           cat > /home/ec2-user/menu-manager/backend/.env << EOF
           # Database Configuration
-          
+
           SPRING_DATASOURCE_URL=jdbc:postgresql://${MenuManagerDatabase.Endpoint.Address}:5432/menu_manager
           SPRING_DATASOURCE_USERNAME=${DBUsername}
           SPRING_DATASOURCE_PASSWORD=${DBPassword}
-          
+
           # Redis Configuration
           SPRING_DATA_REDIS_HOST=${MenuManagerRedisCluster.RedisEndpoint.Address}
           SPRING_DATA_REDIS_PORT=6379
           SPRING_CACHE_TYPE=redis
+
+          # S3 Configuration
+          AWS_BUCKET=${MenuManagerImagesBucket}
+          AWS_REGION=${AWS::Region}
           EOF
 
           chown ec2-user:ec2-user /home/ec2-user/menu-manager/backend/.env
@@ -217,3 +278,11 @@ Outputs:
   RedisPort:
     Description: Porta do Redis
     Value: 6379
+
+  S3BucketName:
+    Description: Nome do bucket S3 para imagens
+    Value: !Ref MenuManagerImagesBucket
+
+  S3BucketURL:
+    Description: URL do bucket S3
+    Value: !Sub 'https://${MenuManagerImagesBucket}.s3.${AWS::Region}.amazonaws.com'
