@@ -6,7 +6,8 @@ const formSchema = z.object({
     name: z.string().min(1, { message: "Nome é um campo obrigatório." }),
     description: z.string().min(1, { message: "Descrição é um campo obrigatório" }),
     price: z.string().min(1, { message: "Preço é um campo obrigatório" }),
-    category_id: z.string()
+    category_id: z.string(),
+    image: z.instanceof(File).optional().nullable(),
 })
 
 export interface UseDialogItemFormProps {
@@ -15,6 +16,7 @@ export interface UseDialogItemFormProps {
         description: string;
         price: string;
         category_id: string;
+        image?: File | null; 
     }
 }
 

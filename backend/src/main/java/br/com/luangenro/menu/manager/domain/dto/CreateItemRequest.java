@@ -41,4 +41,8 @@ public record CreateItemRequest(
             requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull
         @Positive
-        Integer categoryId) {}
+        Integer categoryId,
+    @Schema(
+            description = "URL of the item's image",
+            example = "https://s3.amazonaws.com/bucket/uploads/file.png")
+        String imageUrl) {}

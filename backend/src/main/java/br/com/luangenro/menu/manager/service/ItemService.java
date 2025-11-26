@@ -19,6 +19,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +36,7 @@ public class ItemService {
   private final CategoryRepository categoryRepository;
   private final CacheManager cacheManager;
   private final ItemMapper mapper;
+  private final ImageService imageService;
 
   /**
    * Retrieves a single item by its ID.
@@ -73,7 +75,6 @@ public class ItemService {
       log.info("Fetching all items.");
       items = itemRepository.findAll();
     }
-    log.info("Found {} items.", items.size());
     return items.stream().map(mapper::toItemResponse).toList();
   }
 
@@ -81,6 +82,7 @@ public class ItemService {
    * Creates a new item and associates it with an existing category.
    *
    * @param request The DTO containing the data for the new item.
+   * @param image
    * @return A {@link CreateItemResponse} with the ID and name of the newly created item.
    * @throws CategoryNotFoundException if the category specified in the request does not exist.
    */
@@ -91,7 +93,7 @@ public class ItemService {
           @CacheEvict(value = GET_ALL_CATEGORIES, key = "'allCategories'"),
           @CacheEvict(value = GET_CATEGORY_BY_ID, key = "#request.categoryId()"),
   })
-  public CreateItemResponse createItem(CreateItemRequest request) {
+  public CreateItemResponse createItem(CreateItemRequest request, MultipartFile image) {
     log.info(
         "Attempting to create a new item with name: '{}' in category ID: {}",
         request.name(),
@@ -116,11 +118,18 @@ public class ItemService {
             .category(category)
             .build();
 
-    log.debug("Item entity to be saved: {}", item);
     var savedItem = itemRepository.save(item);
-    log.info("Item '{}' created successfully with ID: {}.", savedItem.getName(), savedItem.getId());
 
-    return new CreateItemResponse(savedItem.getId(), savedItem.getName());
+    if (image != null && !image.isEmpty()) {
+      String fileName = "item-" + savedItem.getId();
+
+      String imageUrl = imageService.saveImage(image, fileName);
+
+      savedItem.setImageUrl(imageUrl);
+      itemRepository.save(item);
+    }
+
+    return new CreateItemResponse(savedItem.getId(), savedItem.getName(), savedItem.getImageUrl());
   }
 
   /**
@@ -140,7 +149,7 @@ public class ItemService {
             @CacheEvict(value = GET_ALL_CATEGORIES, key = "'allCategories'"),
             @CacheEvict(value = GET_CATEGORY_BY_ID, key = "#request.categoryId()"),
   })
-  public ItemResponse updateItem(int id, UpdateItemRequest request) {
+  public ItemResponse updateItem(int id, UpdateItemRequest request, MultipartFile image) {
     log.info("Attempting to update item with ID: {}", id);
     Item itemToUpdate =
         itemRepository
@@ -168,6 +177,18 @@ public class ItemService {
     itemToUpdate.setPrice(request.price());
     itemToUpdate.setCategory(category);
 
+    if (image != null && !image.isEmpty()) {
+      String fileName = "item-" + id;
+      String keyImage = "uploads/" + fileName;
+
+      imageService.deleteImage(keyImage);
+
+      String imageUrl = imageService.saveImage(image, fileName);
+
+      itemToUpdate.setImageUrl(imageUrl);
+      itemRepository.save(itemToUpdate);
+    }
+
     Item updatedItem = itemRepository.save(itemToUpdate);
     log.info("Item with ID {} updated successfully.", updatedItem.getId());
 
@@ -188,11 +209,12 @@ public class ItemService {
             @CacheEvict(value = GET_CATEGORY_BY_ID, allEntries = true),
   })
   public void deleteItem(int id) {
-    log.info("Attempting to delete item with ID: {}", id);
-    if (!itemRepository.existsById(id)) {
-      throw new ItemNotFoundException("Cannot delete. Item with ID %d not found.".formatted(id));
-    }
-    itemRepository.deleteById(id);
-    log.info("Item with ID {} deleted successfully.", id);
+      log.info("Attempting to delete item with ID: {}", id);
+      if (!itemRepository.existsById(id)) {
+          throw new ItemNotFoundException("Cannot delete. Item with ID %d not found.".formatted(id));
+      }
+      itemRepository.deleteById(id);
+      imageService.deleteImage("uploads/item-" + id);
+      log.info("Item with ID {} deleted successfully.", id);
   }
 }

@@ -17,6 +17,7 @@ import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Defines the public contract for managing menu items.
@@ -68,28 +69,6 @@ public interface ItemApi {
           Integer categoryId);
 
   /**
-   * Creates a new menu item.
-   *
-   * @param request The request body containing the details for the new item.
-   * @return A {@link ResponseEntity} with the {@link CreateItemResponse}, a location header, and an
-   *     HTTP 201 (Created) status.
-   */
-  @Operation(summary = "Create a new menu item")
-  @ApiResponses({
-    @ApiResponse(responseCode = "201", description = "Item created successfully"),
-    @ApiResponse(
-        responseCode = "400",
-        description =
-            "Invalid request data, such as a validation error or a non-existent category ID",
-        content =
-            @Content(
-                mediaType = MediaType.APPLICATION_JSON_VALUE,
-                schema = @Schema(implementation = ApiErrorResponse.class)))
-  })
-  @PostMapping
-  ResponseEntity<CreateItemResponse> createItem(@RequestBody @Valid CreateItemRequest request);
-
-  /**
    * Updates an existing menu item.
    *
    * @param id The ID of the item to update.
@@ -120,11 +99,15 @@ public interface ItemApi {
                 mediaType = MediaType.APPLICATION_JSON_VALUE,
                 schema = @Schema(implementation = ApiErrorResponse.class)))
   })
-  @PutMapping("/{id}")
+  @PutMapping(
+      value = "/{id}",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   ResponseEntity<ItemResponse> updateItem(
       @Parameter(description = "ID of the item to be updated", required = true) @PathVariable
           int id,
-      @RequestBody @Valid UpdateItemRequest request);
+      @RequestPart("request") @Valid UpdateItemRequest request,
+      @RequestPart(name = "image", required = false) MultipartFile image);
 
   /**
    * Deletes a menu item by its ID.
@@ -147,4 +130,28 @@ public interface ItemApi {
   ResponseEntity<Void> deleteItem(
       @Parameter(description = "ID of the item to be deleted", required = true) @PathVariable
           int id);
+
+  /**
+   * Creates a new menu item with an image upload.
+   *
+   * <p>This endpoint accepts multipart/form-data with: - data: JSON payload for CreateItemRequest -
+   * image: the uploaded image file
+   */
+  @Operation(summary = "Create a new item with image")
+  @ApiResponses({
+    @ApiResponse(responseCode = "201", description = "Item created successfully"),
+    @ApiResponse(
+        responseCode = "400",
+        description = "Invalid request or image upload error",
+        content =
+            @Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ApiErrorResponse.class)))
+  })
+  @PostMapping(
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  ResponseEntity<CreateItemResponse> createItemWithImage(
+      @RequestPart("request") @Valid CreateItemRequest request,
+      @RequestPart(name = "image", required = false) MultipartFile image);
 }

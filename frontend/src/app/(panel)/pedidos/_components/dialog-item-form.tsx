@@ -3,12 +3,10 @@ import { useForm } from 'react-hook-form'
 import z from 'zod'
 
 const formSchema = z.object({
-    tableNumber: z.string().min(1, { message: "Nome é um campo obrigatório." }),
-    itemsIds: z.array(z.number()).min(1, {
-        message: "Selecione pelo menos um item.",
-    }),
+    tableNumber: z.coerce.number().min(1),
+    itemsIds: z.array(z.number()).min(1),
     status: z.string()
-})
+})  
 
 export interface UseDialogOrderFormProps {
     initialValues?: {
@@ -21,12 +19,14 @@ export interface UseDialogOrderFormProps {
 export type DialogOrderFormData = z.infer<typeof formSchema>;
 
 export function useDialogOrderForm({ initialValues }: UseDialogOrderFormProps){
-    return useForm<DialogOrderFormData>({
+    return useForm<any>({
         resolver: zodResolver(formSchema),
-        defaultValues: initialValues || {
-            tableNumber: "",
-            itemsIds: [],
-            status: "ORDERED"
+        defaultValues: {
+            tableNumber: initialValues?.tableNumber
+                ? Number(initialValues.tableNumber)
+                : 0,
+            itemsIds: initialValues?.itemsIds ?? [],
+            status: initialValues?.status ?? "ORDERED",
         }
     })
 }

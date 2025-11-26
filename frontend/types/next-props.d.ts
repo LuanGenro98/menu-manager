@@ -4,6 +4,8 @@ export interface Item {
     description: string,
     price: string;
     category_id: string;
+    imageUrl?: string;
+    hasOrders?: boolean;
 }
 
 export interface Category {
@@ -16,7 +18,7 @@ export interface Category {
 export interface Order {
     id?: number;
     itemsIds: number[];
-    tableNumber: string;
+    tableNumber?: string;
     items: Item[];
     status: string;
     price: number;

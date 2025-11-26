@@ -11,7 +11,7 @@ cache:
 spring:
   profiles:
     active: "" # Para ativar a segurança, deixe em branco ou remova a linha
-    # active: "no-auth" # Para desativar a segurança, use esta linha
+   # active: "no-auth" # Para desativar a segurança, use esta linha
   datasource:
     url: jdbc:postgresql://localhost:5432/menu_manager
     username: ${BD_USERNAME:admin}
@@ -22,6 +22,15 @@ spring:
   liquibase:
     enabled: true
     change-log: /db/db.changelog-master.xml
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 jwt:
   secret-key: zB8ULkhG1UViwskFdxN1K47wnTTlyIS-B7WboEcycsI=%
+
+aws:
+  region: ${AWS_REGION}
+  s3:
+    bucket: ${AWS_BUCKET}
