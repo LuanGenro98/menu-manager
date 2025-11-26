@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-  Stack completa para a aplicacao Menu Manager com RDS PostgreSQL e ElastiCache Redis
-  no ambiente AWS Academy Sandbox.
+  Stack completa para a aplicacao Menu Manager com RDS PostgreSQL, ElastiCache Redis, 
+  EC2 Instance e S3Bucket no ambiente AWS Academy Sandbox.
 
 Parameters:
   SubnetIds:
@@ -36,9 +36,26 @@ Parameters:
     Default: 'uploads'
 
 Resources:
-  # Secao 1:  Security Groups necessarios para a Aplicacao, RDS e ElastiCache
+  # Secao 1:  Security Groups necessarios para a Aplicacao Frontend, Aplicacao Backend, RDS e ElastiCache
 
-  # 1.1 Security Group para a aplicação EC2
+  # 1.1 Security Group para a aplicação EC2 (Frontend)
+  MenuManagerFrontendSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Libera portas 22 (SSH) e 80 (App)
+      SecurityGroupIngress:
+        # Regra do SSH (Porta 22)
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        # Regra da Aplicação Frontend (Porta 80)
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  # 1.2 Security Group para a aplicação EC2 (Backend)
   MenuManagerBackendSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -55,7 +72,7 @@ Resources:
           ToPort: 8080
           CidrIp: 0.0.0.0/0
 
-  # 1.2 Security Group para o RDS
+  # 1.3 Security Group para o RDS
   MenuManagerDatabaseSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -72,7 +89,7 @@ Resources:
           ToPort: 5432
           CidrIp: 0.0.0.0/0
 
-  # 1.3 Security Group para o ElastiCache Redis
+  # 1.4 Security Group para o ElastiCache Redis
   MenuManagerRedisSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -118,7 +135,7 @@ Resources:
       VPCSecurityGroups:
         - !GetAtt MenuManagerDatabaseSecurityGroup.GroupId
       DBSubnetGroupName: !Ref MenuManagerDatabaseSubnetGroup
-      PubliclyAccessible: true
+      PubliclyAccessible: false
       BackupRetentionPeriod: 7
       DBName: menu_manager
 
@@ -158,6 +175,7 @@ Resources:
               - '*'
             MaxAge: 3000
 
+  # 3.4 Bucket Policy para o Bucket S3
   MenuManagerBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -180,8 +198,8 @@ Resources:
               - 's3:GetObject'
             Resource: !Sub 'arn:aws:s3:::menu-manager-images-${AWS::AccountId}/${BucketUploadsFolder}/*'
 
-  # 3.3 O Servidor EC2 (apenas aplicação backend)
-  MenuManagerInstance:
+  # 3.5 EC2 Instance para o Backend da Aplicacao
+  MenuManagerBackendInstance:
     Type: AWS::EC2::Instance
     DependsOn:
       - MenuManagerImagesBucket
@@ -226,7 +244,6 @@ Resources:
           # Configura as variáveis de ambiente para conectar ao RDS e ElastiCache
           cat > /home/ec2-user/menu-manager/backend/.env << EOF
           # Database Configuration
-
           SPRING_DATASOURCE_URL=jdbc:postgresql://${MenuManagerDatabase.Endpoint.Address}:5432/menu_manager
           SPRING_DATASOURCE_USERNAME=${DBUsername}
           SPRING_DATASOURCE_PASSWORD=${DBPassword}
@@ -243,13 +260,61 @@ Resources:
 
           chown ec2-user:ec2-user /home/ec2-user/menu-manager/backend/.env
 
-          # Sobe apenas a aplicação (sem o banco)
+          # Sobe o backend da aplicação
           su - ec2-user -c "cd /home/ec2-user/menu-manager/backend && DOCKER_BUILDKIT=0 docker-compose -f ./docker-compose.aws.yml up --build -d app"
 
+  # 3.6 EC2 Instance para o Frontend da Aplicacao
+  MenuManagerFrontendInstance:
+    Type: AWS::EC2::Instance
+    DependsOn:
+      - MenuManagerBackendInstance
+    Properties:
+      InstanceType: t3.medium
+      ImageId: ami-0cae6d6fe6048ca2c
+      KeyName: vockey
+      IamInstanceProfile: LabInstanceProfile
+      SecurityGroupIds:
+        - !Ref MenuManagerFrontendSecurityGroup
+
+      # Script de Auto-Deploy
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          # Atualiza os pacotes
+          yum update -y
+
+          # Instala as ferramentas
+          yum install -y git docker
+          systemctl start docker
+          usermod -aG docker ec2-user
+
+          # Instala o Docker Compose V1
+          curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          chmod +x /usr/local/bin/docker-compose
+
+          # Clona o repositório
+          su - ec2-user -c "git clone --branch ${CloneBranch}  --single-branch https://github.com/LuanGenro98/menu-manager.git /home/ec2-user/menu-manager"
+
+          # Configura as variáveis de ambiente para conectar ao RDS e ElastiCache
+          cat > /home/ec2-user/menu-manager/frontend/.env.production << EOF
+          # Backend API Configuration
+          URL_API=http://${MenuManagerBackendInstance.PublicDnsName}:8080/
+          S3_URL_BUCKET=${MenuManagerImagesBucket}.s3.${AWS::Region}.amazonaws.com
+          EOF
+
+          chown ec2-user:ec2-user /home/ec2-user/menu-manager/frontend/.env.production
+
+          # Sobe apenas o frontend da aplicação
+          su - ec2-user -c "cd /home/ec2-user/menu-manager/frontend && DOCKER_BUILDKIT=0 docker-compose -f ./docker-compose.aws.yml up --build -d nextapp"
+
 Outputs:
-  ApplicationURL:
+  FrontendURL:
+    Description: URL do frontend da aplicacao, pode demorar ate 5 minutos para ficar disponivel
+    Value: !Sub 'http://${MenuManagerFrontendInstance.PublicDnsName}/'
+
+  BackendSwaggerURL:
     Description: URL da aplicacao, pode demorar ate 5 minutos para ficar disponivel
-    Value: !Sub 'http://${MenuManagerInstance.PublicDnsName}:8080/swagger-ui/index.html#/'
+    Value: !Sub 'http://${MenuManagerBackendInstance.PublicDnsName}:8080/swagger-ui/index.html#/'
 
   DatabaseEndpoint:
     Description: Endpoint do banco de dados RDS
